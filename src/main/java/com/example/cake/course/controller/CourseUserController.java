@@ -1,0 +1,4 @@
+package com.example.cake.course.controller;
+
+public class CourseUserController {
+}
