@@ -1,11 +1,11 @@
 package com.example.cake.course.dto;
 
-
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class CourseCategoryDelete {
-    @NotBlank(message = "Code is required")
-    private String code ;
+public class CourseCategoryUpdateRequest {
+    private String id;          // MongoDB ID
+    private String code;
+    private String name;
+    private String description;
 }

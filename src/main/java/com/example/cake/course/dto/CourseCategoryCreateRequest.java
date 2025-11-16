@@ -1,18 +1,10 @@
-package com.example.cake.category.dto;
+package com.example.cake.course.dto;
 
 import lombok.Data;
-import jakarta.validation.constraints.NotBlank;
 
 @Data
 public class CourseCategoryCreateRequest {
-
-    @NotBlank(message = "Mã danh mục không được để trống")
-    private String code;
-
-    @NotBlank(message = "Tên danh mục không được để trống")
-    private String name;
-
-    private String description;
-
-    private Boolean isActive = true; // Mặc định bật danh mục
+    private String code;        // vd: DEV, DESIGN
+    private String name;        // Lập trình, Thiết kế
+    private String description; // mô tả danh mục
 }

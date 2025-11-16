@@ -27,9 +27,10 @@ public class EmailValidationService {
         String response = restTemplate.getForObject(url, String.class);
         JSONObject json = new JSONObject(response);
 
-        boolean formatValid = json.getBoolean("format_valid");
-        boolean smtpCheck = json.getBoolean("smtp_check");
+        boolean formatValid = json.optBoolean("format_valid", false);
+        boolean smtpCheck = json.optBoolean("smtp_check", true);
 
         return formatValid && smtpCheck;
     }
+
 }

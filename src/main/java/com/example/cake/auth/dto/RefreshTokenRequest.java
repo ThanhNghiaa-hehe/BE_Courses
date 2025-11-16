@@ -6,3 +6,4 @@ public class RefreshTokenRequest {
     private String email;
     private String refreshToken;
 }
+

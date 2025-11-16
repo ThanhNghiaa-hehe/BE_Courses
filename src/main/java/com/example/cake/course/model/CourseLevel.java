@@ -1,4 +1,4 @@
-package com.example.cake.category.model;
+package com.example.cake.course.model;
 
 public enum CourseLevel {
 }

@@ -1,24 +1,17 @@
-package com.example.cake.category.dto;
+package com.example.cake.course.dto;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
 
-import java.math.BigDecimal;
 @Data
 public class CourseCreateRequest {
 
-    @NotBlank
     private String categoryCode;
-
-    @NotBlank
-    private String name;
-
+    private String title;
     private String description;
-    private BigDecimal price;
-    private String imageUrl; // Thay cho images
-    private Boolean isAvailable = true;
+    private Double price;
+    private String thumbnailUrl;
 
-    private Integer duration; // thời lượng khóa học
-    private String level; // BEGINNER, INTERMEDIATE, ADVANCED
-    private Double discountPercentage;
+    private Integer duration;       // thời lượng (giờ)
+    private String level;           // Beginner/Intermediate/Advanced
+    private Boolean isPublished;    // có công khai hay không
 }

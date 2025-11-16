@@ -1,47 +1,69 @@
-
 package com.example.cake.config;
 
 import com.example.cake.auth.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity  // cần thiết để @PreAuthorize hoạt động
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http// 🔥 Thêm dòng này để cho phép Spring Security sử dụng cấu hình Cors từ WebMvcConfigurer
-                .csrf(csrf -> csrf.disable())
-                .cors(withDefaults())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/static/**").permitAll()
-                        .requestMatchers("/api/orders/**").permitAll()
-                        .requestMatchers("/api/categories/**").hasRole("ADMIN")
-                        .requestMatchers("/api/favorites/**").hasRole("USER")
-                        .requestMatchers("/api/cart/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/products/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers("/api/attendance/**").hasAnyRole("ADMIN", "USER")
 
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> {})   // bật CORS default
+
+                // ▬▬▬▬▬▬▬ PERMIT ALL ROUTES ▬▬▬▬▬▬▬
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/auth/**",        // login/register
+                                "/api/courses/**"      // public course
+                        ).permitAll()
+
+                        // admin
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // tất cả API còn lại cần login
                         .anyRequest().authenticated()
                 )
 
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+                // ▬▬▬▬▬▬▬ SECURITY STATE ▬▬▬▬▬▬▬
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
+                // ▬▬▬▬▬▬▬ JWT FILTER ▬▬▬▬▬▬▬
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    // encoder cho password
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    // AuthenticationManager dùng cho login
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }

@@ -1,8 +1,7 @@
 package com.example.cake.favorite.service;
 
 import com.example.cake.auth.repository.UserRepository;
-import com.example.cake.category.model.Product;
-import com.example.cake.category.repository.ProductRepository;
+import com.example.cake.course.repository.CourseRepository;
 import com.example.cake.favorite.dto.FavoriteRequest;
 import com.example.cake.favorite.dto.FavoriteResponse;
 import com.example.cake.favorite.model.Favorite;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,7 +19,7 @@ import java.util.stream.Collectors;
 public class FavoriteService {
 
     private final FavoriteRepository favoriteRepository;
-    private final ProductRepository productRepository;
+    private final CourseRepository productRepository;
     private final UserRepository userRepository;
 
     // Thêm sản phẩm vào danh sách yêu thích

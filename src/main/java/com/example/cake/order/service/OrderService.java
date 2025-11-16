@@ -2,11 +2,9 @@ package com.example.cake.order.service;
 
 import com.example.cake.auth.model.User;
 import com.example.cake.auth.repository.UserRepository;
-import com.example.cake.cart.model.CartItem;
 import com.example.cake.cart.service.CartSerivce;
-import com.example.cake.category.model.Product;
-import com.example.cake.category.repository.ProductRepository;
-import com.example.cake.order.dto.OrderRequest;
+import com.example.cake.course.model.Course;
+import com.example.cake.course.repository.CourseRepository;
 import com.example.cake.order.dto.OrderResponse;
 import com.example.cake.order.model.Order;
 import com.example.cake.order.model.OrderItem;
@@ -28,7 +26,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final CartSerivce  cartSerivce;
-    private final ProductRepository productRepository;
+    private final CourseRepository productRepository;
 
     public ResponseMessage<Order> createOrder(Order orderRequest) {
         try {
@@ -289,15 +287,18 @@ public class OrderService {
     }
 
     private double calculateTotalPrice(Order order) {
+        // Đối với khóa học, không có quantity, mỗi khóa chỉ mua 1 lần
         double itemsTotal = order.getItems().stream()
                 .mapToDouble(item -> {
-                    double itemPrice = item.getPrice() * item.getQuantity();
+                    // Giá của khóa học (không nhân với quantity)
+                    double itemPrice = item.getPrice();
+                    // Áp dụng giảm giá của từng khóa học
                     double discountAmount = itemPrice * (item.getDiscount() / 100.0);
                     return itemPrice - discountAmount;
                 })
                 .sum();
 
-        // Apply order-level discount
+        // Apply order-level discount (giảm giá tổng đơn hàng)
         double discountAmount = itemsTotal * (order.getDiscount() / 100.0);
         itemsTotal -= discountAmount;
         
@@ -306,40 +307,32 @@ public class OrderService {
 
     private ResponseMessage<String> updateProductStock(Order order) {
         try {
+            // Đối với khóa học, không cần kiểm tra và trừ kho
+            // Chỉ cần verify rằng các khóa học tồn tại và đang được publish
             for (OrderItem item : order.getItems()) {
-                Optional<Product> productOptional = productRepository.findById(item.getProductId());
+                Optional<Course> productOptional = productRepository.findById(item.getProductId());
                 
                 if (productOptional.isEmpty()) {
                     return new ResponseMessage<>(false, 
-                        "Product not found with ID: " + item.getProductId(), null);
+                        "Khóa học không tồn tại với ID: " + item.getProductId(), null);
                 }
                 
-                Product product = productOptional.get();
+                Course course = productOptional.get();
                 
-                // Check if there's enough stock
-                if (product.getStock() == null || product.getStock() < item.getQuantity()) {
-                    return new ResponseMessage<>(false, 
-                        "Insufficient stock for product: " + product.getName() + 
-                        ". Available: " + (product.getStock() != null ? product.getStock() : 0) + 
-                        ", Required: " + item.getQuantity(), null);
+                // Kiểm tra khóa học có đang được publish không
+                if (course.getIsPublished() == null || !course.getIsPublished()) {
+                    return new ResponseMessage<>(false,
+                        "Khóa học không khả dụng: " + course.getTitle(), null);
                 }
                 
-                // Decrease stock
-                product.setStock(product.getStock() - item.getQuantity());
-                product.setUpdatedAt(LocalDateTime.now());
-                
-                // Update availability if stock reaches 0
-                if (product.getStock() <= 0) {
-                    product.setIsAvailable(false);
-                }
-                
-                productRepository.save(product);
+                // Không cần cập nhật stock vì khóa học không có giới hạn số lượng
+                // Khóa học có thể được bán nhiều lần cho nhiều học viên
             }
             
-            return new ResponseMessage<>(true, "Product stock updated successfully", null);
+            return new ResponseMessage<>(true, "Xác thực khóa học thành công", null);
         } catch (Exception e) {
             return new ResponseMessage<>(false, 
-                "Failed to update product stock: " + e.getMessage(), null);
+                "Lỗi khi xác thực khóa học: " + e.getMessage(), null);
         }
     }
 }
