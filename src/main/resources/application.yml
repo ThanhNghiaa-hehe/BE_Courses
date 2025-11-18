@@ -3,7 +3,6 @@ spring:
     mongodb:
       uri: mongodb+srv://thanhnghiat42_db_user:yqpvwPOczWuExr0J@coursedb.oind0z4.mongodb.net/?appName=courseDb
       database: courseDb
-
     redis:
       host: ${SPRING_REDIS_HOST:localhost}
       port: ${SPRING_REDIS_PORT:6379}
@@ -20,6 +19,10 @@ spring:
           starttls:
             enable: true
 
+  web:
+    resources:
+      static-locations: classpath:/static/,file:uploads/
+
 # API key for mailbox validation
 mailboxlayer:
   api:
@@ -33,6 +36,3 @@ jwt:
 app:
   upload-dir: uploads/
 
-  web:
-    resources:
-      static-locations: classpath:/static/,file:uploads/

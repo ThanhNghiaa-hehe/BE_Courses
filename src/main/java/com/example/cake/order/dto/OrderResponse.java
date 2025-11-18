@@ -16,16 +16,16 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class OrderResponse {
-    private String id;
-    private String userId;
-    private String userName;        // Tên user
-    private String userPhone;       // Số điện thoại user
-    private List<OrderItem> items;
-    private double totalPrice;
-    private double discount;
-    private String shippingAddress;
-    private PaymentMethod paymentMethod;
-    private OrderStatus status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+        private String id;                   // Order ID
+    private String userId;               // ID của user đặt đơn
+    private String userName;             // Tên user (join từ User collection)
+    private String userPhone;            // Số điện thoại user (join từ User collection)
+    private List<OrderItem> items;       // Danh sách khóa học trong đơn
+    private Double totalPrice;           // Tổng giá trị đơn hàng
+    private Double discount;             // Giảm giá tổng đơn (%)
+    private String shippingAddress;      // Địa chỉ giao hàng
+    private PaymentMethod paymentMethod; // Phương thức thanh toán
+    private OrderStatus status;          // Trạng thái đơn hàng
+    private LocalDateTime createdAt;     // Thời gian tạo đơn
+    private LocalDateTime updatedAt;     // Thời gian cập nhật đơn
 }

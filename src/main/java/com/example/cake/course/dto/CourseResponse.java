@@ -16,4 +16,11 @@ public class CourseResponse {
     private Integer duration;
     private String level;
     private Boolean isPublished;
+
+    // Thêm các trường để mapping với Course model và FavoriteItem
+    private String instructorName;      // Tên giảng viên
+    private Double rating;              // Đánh giá trung bình (0-5)
+    private Integer totalStudents;      // Tổng số học viên đã đăng ký
+    private Integer discountPercent;    // % giảm giá (0-100)
+    private Double discountedPrice;     // Giá sau giảm
 }

@@ -37,14 +37,14 @@ public class CartSerivce {
             cart = existingCart.get();
 
             Optional<CartItem> existingItem = cart.getItems().stream()
-                    .filter(item -> item.getProductId().equals(newItem.getProductId()))
+                    .filter(item -> item.getCourseId().equals(newItem.getCourseId()))
                     .findFirst();
 
             if (existingItem.isPresent()) {
-                // Nếu đã có, tăng số lượng
-                existingItem.get().setQuantity(existingItem.get().getQuantity() + newItem.getQuantity());
+                // Khóa học đã có trong giỏ hàng - không thêm nữa (khóa học không có số lượng)
+                return new ResponseMessage<>(false, "Khóa học đã có trong giỏ hàng", cart);
             } else {
-                // Nếu chưa có, thêm mớiLo
+                // Nếu chưa có, thêm mới
                 cart.getItems().add(newItem);
             }
         } else {
@@ -79,7 +79,7 @@ public class CartSerivce {
 
         return new ResponseMessage<>(true, "Lấy giỏ hàng thành công", cart.get());
     }
-    public ResponseMessage<Boolean> deleteCartItem(String userId, String productId) {
+    public ResponseMessage<Boolean> deleteCartItem(String userId, String courseId) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
             return new ResponseMessage<>(false, "User không tồn tại", false);
@@ -89,12 +89,12 @@ public class CartSerivce {
             return new ResponseMessage<>(false, "Không tìm thấy giỏ hàng", false);
         }
         List<CartItem> items = existingCart.get().getItems();
-        boolean itemRemoved = items.removeIf(item -> item.getProductId().equals(productId));
+        boolean itemRemoved = items.removeIf(item -> item.getCourseId().equals(courseId));
         if (!itemRemoved) {
-            return new ResponseMessage<>(false, "Sản phẩm không tồn tại trong giỏ hàng", false);
+            return new ResponseMessage<>(false, "Khóa học không tồn tại trong giỏ hàng", false);
         }
         cartRepository.save(existingCart.get());
-        return new ResponseMessage<>(true, "Xóa sản phẩm thành công", true);
+        return new ResponseMessage<>(true, "Xóa khóa học thành công", true);
     }
 
 
@@ -138,7 +138,7 @@ public class CartSerivce {
         return new ResponseMessage<>(true, "Get all carts successfully", carts);
     }
 
-    public boolean deleteCartItemsByProductIds(String userId, List<String> productId){
+    public boolean deleteCartItemsByProductIds(String userId, List<String> courseIds){
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
             return false;
@@ -150,8 +150,8 @@ public class CartSerivce {
         }
         List<CartItem> items = existingCart.get().getItems();
 
-        for (String id : productId) {
-            items.removeIf(item -> item.getProductId().equals(id));
+        for (String id : courseIds) {
+            items.removeIf(item -> item.getCourseId().equals(id));
         }
         cartRepository.save(existingCart.get());
         return true;

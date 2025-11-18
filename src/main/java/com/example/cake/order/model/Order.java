@@ -20,12 +20,12 @@ public class Order {
     @Id
     private String id;                   // Order ID
     private String userId;               // ID của user đặt đơn
-    private List<OrderItem> items;       // Danh sách sản phẩm trong đơn
-    private double totalPrice;           // Tổng giá trị đơn hàng
-    private double discount;             // Tổng giảm giá của đơn (% hoặc giá trị tuỳ bạn)
-    private String shippingAddress;      // Địa chỉ giao hàng
+    private List<OrderItem> items;       // Danh sách khóa học trong đơn
+    private Double totalPrice;           // Tổng giá trị đơn hàng (sau khi đã áp dụng giảm giá)
+    private Double discount;             // Giảm giá tổng đơn (%, VD: 5 = giảm 5%)
+    private String shippingAddress;      // Địa chỉ giao hàng (email hoặc địa chỉ liên hệ)
     private OrderStatus status;          // Trạng thái đơn hàng
     private PaymentMethod paymentMethod; // Phương thức thanh toán
     private LocalDateTime createdAt;     // Thời gian tạo đơn
-    private LocalDateTime updatedAt;     // Thời gian cập nhật đơn (nếu có)
+    private LocalDateTime updatedAt;     // Thời gian cập nhật đơn
 }

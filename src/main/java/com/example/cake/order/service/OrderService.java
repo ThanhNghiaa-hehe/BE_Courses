@@ -56,7 +56,7 @@ public class OrderService {
             Order order = Order.builder()
                     .userId(orderRequest.getUserId())
                     .items(orderRequest.getItems())
-                    .discount(orderRequest.getDiscount())
+                    .discount(orderRequest.getDiscount() != null ? orderRequest.getDiscount() : 0.0)
                     .shippingAddress(orderRequest.getShippingAddress())
                     .paymentMethod(orderRequest.getPaymentMethod())
                     .status(OrderStatus.UNCONFIRMED)
@@ -65,8 +65,8 @@ public class OrderService {
                     .build();
 
             // Calculate total price if not provided
-            if (orderRequest.getTotalPrice() <= 0) {
-                double calculatedTotal = calculateTotalPrice(order);
+            if (orderRequest.getTotalPrice() == null || orderRequest.getTotalPrice() <= 0) {
+                Double calculatedTotal = calculateTotalPrice(order);
                 order.setTotalPrice(calculatedTotal);
             } else {
                 order.setTotalPrice(orderRequest.getTotalPrice());
@@ -74,12 +74,12 @@ public class OrderService {
 
             Order savedOrder = orderRepository.save(order);
 
-            // Extract product IDs from order items to remove from cart
-            List<String> productIds = orderRequest.getItems().stream()
-                    .map(OrderItem::getProductId)
+            // Extract course IDs from order items to remove from cart
+            List<String> courseIds = orderRequest.getItems().stream()
+                    .map(OrderItem::getCourseId)
                     .toList();
             
-            if (cartSerivce.deleteCartItemsByProductIds(orderRequest.getUserId(), productIds)) {
+            if (cartSerivce.deleteCartItemsByProductIds(orderRequest.getUserId(), courseIds)) {
                 // Log warning but don't fail the order creation
                 System.out.println("Warning: Failed to remove items from cart after order creation");
             }
@@ -286,23 +286,25 @@ public class OrderService {
         }
     }
 
-    private double calculateTotalPrice(Order order) {
+    private Double calculateTotalPrice(Order order) {
         // Đối với khóa học, không có quantity, mỗi khóa chỉ mua 1 lần
         double itemsTotal = order.getItems().stream()
                 .mapToDouble(item -> {
-                    // Giá của khóa học (không nhân với quantity)
-                    double itemPrice = item.getPrice();
-                    // Áp dụng giảm giá của từng khóa học
-                    double discountAmount = itemPrice * (item.getDiscount() / 100.0);
-                    return itemPrice - discountAmount;
+                    // Ưu tiên sử dụng discountedPrice nếu có, nếu không thì dùng price
+                    Double finalPrice = item.getDiscountedPrice();
+                    if (finalPrice == null || finalPrice <= 0) {
+                        finalPrice = item.getPrice();
+                    }
+                    return finalPrice != null ? finalPrice : 0.0;
                 })
                 .sum();
 
         // Apply order-level discount (giảm giá tổng đơn hàng)
-        double discountAmount = itemsTotal * (order.getDiscount() / 100.0);
+        Double orderDiscount = order.getDiscount() != null ? order.getDiscount() : 0.0;
+        double discountAmount = itemsTotal * (orderDiscount / 100.0);
         itemsTotal -= discountAmount;
         
-        return Math.max(0, itemsTotal); // Ensure total is not negative
+        return Math.max(0.0, itemsTotal); // Ensure total is not negative
     }
 
     private ResponseMessage<String> updateProductStock(Order order) {
@@ -310,15 +312,15 @@ public class OrderService {
             // Đối với khóa học, không cần kiểm tra và trừ kho
             // Chỉ cần verify rằng các khóa học tồn tại và đang được publish
             for (OrderItem item : order.getItems()) {
-                Optional<Course> productOptional = productRepository.findById(item.getProductId());
-                
-                if (productOptional.isEmpty()) {
-                    return new ResponseMessage<>(false, 
-                        "Khóa học không tồn tại với ID: " + item.getProductId(), null);
+                Optional<Course> courseOptional = productRepository.findById(item.getCourseId());
+
+                if (courseOptional.isEmpty()) {
+                    return new ResponseMessage<>(false,
+                        "Khóa học không tồn tại với ID: " + item.getCourseId(), null);
                 }
                 
-                Course course = productOptional.get();
-                
+                Course course = courseOptional.get();
+
                 // Kiểm tra khóa học có đang được publish không
                 if (course.getIsPublished() == null || !course.getIsPublished()) {
                     return new ResponseMessage<>(false,

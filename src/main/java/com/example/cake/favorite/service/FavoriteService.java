@@ -19,10 +19,10 @@ import java.util.stream.Collectors;
 public class FavoriteService {
 
     private final FavoriteRepository favoriteRepository;
-    private final CourseRepository productRepository;
+    private final CourseRepository courseRepository;
     private final UserRepository userRepository;
 
-    // Thêm sản phẩm vào danh sách yêu thích
+    // Thêm khóa học vào danh sách yêu thích
     public FavoriteResponse addToFavorite(String userId, FavoriteRequest request) {
         // 1. Kiểm tra userId tồn tại
         var userOptional = userRepository.findById(userId);
@@ -30,10 +30,10 @@ public class FavoriteService {
             throw new RuntimeException("Người dùng không tồn tại");
         }
 
-        // 2. Kiểm tra productId tồn tại
-        var productOptional = productRepository.findById(request.getProductId());
-        if (productOptional.isEmpty()) {
-            throw new RuntimeException("Sản phẩm không tồn tại");
+        // 2. Kiểm tra courseId tồn tại
+        var courseOptional = courseRepository.findById(request.getCourseId());
+        if (courseOptional.isEmpty()) {
+            throw new RuntimeException("Khóa học không tồn tại");
         }
 
         // 3. Tìm bản ghi Favorite của user
@@ -42,13 +42,18 @@ public class FavoriteService {
         // 4. Nếu chưa có bản ghi -> tạo mới
         if (favorite == null) {
             FavoriteItem favoriteItem = FavoriteItem.builder()
-                    .productId(request.getProductId())
-                    .name(request.getName())
-                    .image(request.getImage())
+                    .courseId(request.getCourseId())
+                    .title(request.getTitle())
+                    .thumbnailUrl(request.getThumbnailUrl())
                     .price(request.getPrice())
-                    .quantity(request.getQuantity())
+                    .discountedPrice(request.getDiscountedPrice())
+                    .discountPercent(request.getDiscountPercent())
                     .selected(false)
-                    .discount(request.getDiscount())
+                    .level(request.getLevel())
+                    .duration(request.getDuration())
+                    .instructorName(request.getInstructorName())
+                    .rating(request.getRating())
+                    .totalStudents(request.getTotalStudents())
                     .build();
 
             favorite = Favorite.builder()
@@ -64,23 +69,28 @@ public class FavoriteService {
                     .build();
         }
 
-        // 5. Nếu đã có bản ghi thì kiểm tra sản phẩm đã tồn tại chưa
+        // 5. Nếu đã có bản ghi thì kiểm tra khóa học đã tồn tại chưa
         boolean exists = favorite.getFavoriteItem().stream()
-                .anyMatch(item -> item.getProductId().equals(request.getProductId()));
+                .anyMatch(item -> item.getCourseId().equals(request.getCourseId()));
 
         if (exists) {
-            throw new RuntimeException("Sản phẩm đã có trong danh sách yêu thích");
+            throw new RuntimeException("Khóa học đã có trong danh sách yêu thích");
         }
 
         // 6. Thêm mới item vào list
         FavoriteItem newItem = FavoriteItem.builder()
-                .productId(request.getProductId())
-                .name(request.getName())
-                .image(request.getImage())
+                .courseId(request.getCourseId())
+                .title(request.getTitle())
+                .thumbnailUrl(request.getThumbnailUrl())
                 .price(request.getPrice())
-                .quantity(request.getQuantity())
+                .discountedPrice(request.getDiscountedPrice())
+                .discountPercent(request.getDiscountPercent())
                 .selected(false)
-                .discount(request.getDiscount())
+                .level(request.getLevel())
+                .duration(request.getDuration())
+                .instructorName(request.getInstructorName())
+                .rating(request.getRating())
+                .totalStudents(request.getTotalStudents())
                 .build();
 
         favorite.getFavoriteItem().add(newItem);
@@ -114,8 +124,8 @@ public class FavoriteService {
                 .collect(Collectors.toList());
     }
 
-    // Xóa sản phẩm khỏi danh sách yêu thích
-    public void removeFromFavorite(String userId, String productId) {
+    // Xóa khóa học khỏi danh sách yêu thích
+    public void removeFromFavorite(String userId, String courseId) {
         // Kiểm tra userId tồn tại
         var userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
@@ -132,10 +142,10 @@ public class FavoriteService {
         
         // Tìm và xóa item khỏi list
         boolean removed = favorite.getFavoriteItem().removeIf(item -> 
-            item.getProductId().equals(productId));
-        
+            item.getCourseId().equals(courseId));
+
         if (!removed) {
-            throw new RuntimeException("Sản phẩm không có trong danh sách yêu thích");
+            throw new RuntimeException("Khóa học không có trong danh sách yêu thích");
         }
 
         // Nếu list rỗng thì xóa luôn document, không thì save lại
@@ -146,18 +156,18 @@ public class FavoriteService {
         }
     }
 
-    // Kiểm tra sản phẩm có trong danh sách yêu thích không
-    public boolean isProductInFavorite(String userId, String productId) {
+    // Kiểm tra khóa học có trong danh sách yêu thích không
+    public boolean isProductInFavorite(String userId, String courseId) {
         List<Favorite> favorites = favoriteRepository.findByUserId(userId);
         if (favorites.isEmpty()) {
             return false;
         }
         
         return favorites.get(0).getFavoriteItem().stream()
-                .anyMatch(item -> item.getProductId().equals(productId));
+                .anyMatch(item -> item.getCourseId().equals(courseId));
     }
 
-    // Đếm số lượng sản phẩm yêu thích của user
+    // Đếm số lượng khóa học yêu thích của user
     public long countFavoritesByUserId(String userId) {
         List<Favorite> favorites = favoriteRepository.findByUserId(userId);
         if (favorites.isEmpty()) {
@@ -167,8 +177,8 @@ public class FavoriteService {
         return favorites.get(0).getFavoriteItem().size();
     }
 
-    // Cập nhật trạng thái selected của sản phẩm yêu thích
-    public FavoriteResponse updateSelectedStatus(String userId, String productId, boolean selected) {
+    // Cập nhật trạng thái selected của khóa học yêu thích
+    public FavoriteResponse updateSelectedStatus(String userId, String courseId, boolean selected) {
         // Kiểm tra userId tồn tại
         var userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
@@ -186,7 +196,7 @@ public class FavoriteService {
         // Tìm và cập nhật trạng thái selected
         boolean found = false;
         for (FavoriteItem item : favorite.getFavoriteItem()) {
-            if (item.getProductId().equals(productId)) {
+            if (item.getCourseId().equals(courseId)) {
                 item.setSelected(selected);
                 found = true;
                 break;
@@ -194,7 +204,7 @@ public class FavoriteService {
         }
         
         if (!found) {
-            throw new RuntimeException("Sản phẩm không có trong danh sách yêu thích");
+            throw new RuntimeException("Khóa học không có trong danh sách yêu thích");
         }
 
         Favorite saved = favoriteRepository.save(favorite);
@@ -206,7 +216,7 @@ public class FavoriteService {
                 .build();
     }
 
-    // Xóa tất cả sản phẩm yêu thích của user
+    // Xóa tất cả khóa học yêu thích của user
     public void clearFavorites(String userId) {
         List<Favorite> favorites = favoriteRepository.findByUserId(userId);
         favoriteRepository.deleteAll(favorites);
