@@ -1,5 +1,6 @@
 package com.example.cake.course.model;
 
+import com.example.cake.lesson.model.CourseOverview;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -30,4 +31,7 @@ public class Course {
     private Integer totalStudents;      // Tổng số học viên đã đăng ký
     private Integer discountPercent;    // % giảm giá (0-100)
     private Double discountedPrice;     // Giá sau giảm (tính sẵn hoặc computed)
+
+    // ========== COURSE OVERVIEW (Thông tin chi tiết) ==========
+    private CourseOverview overview;    // Thông tin tổng quan: bạn sẽ học gì, yêu cầu, nội dung, etc.
 }
