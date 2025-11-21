@@ -13,9 +13,9 @@
 //        // Avatar user: http://localhost:8080/static/avatars/abc.jpg
 //        registry.addResourceHandler("/static/avatars/**")
 //                .addResourceLocations("file:uploads/avatars/");
-//        //  Ảnh sản phẩm: http://localhost:8080/static/products/abc.jpg
-//        registry.addResourceHandler("/static/products/**")
-//                .addResourceLocations("file:uploads/products/");
+//        //  Ảnh khóa học: http://localhost:8080/static/courses/abc.jpg
+//        registry.addResourceHandler("/static/courses/**")
+//                .addResourceLocations("file:uploads/courses/");
 //
 //    }
 //}
@@ -38,8 +38,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/static/avatars/**")
                 .addResourceLocations("file:" + uploadDir + "avatars/");
 
-        registry.addResourceHandler("/static/products/**")
-                .addResourceLocations("file:" + uploadDir + "products/");
+        registry.addResourceHandler("/static/courses/**")
+                .addResourceLocations("file:" + uploadDir + "courses/");
     }
 }
 

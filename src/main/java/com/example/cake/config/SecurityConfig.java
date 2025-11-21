@@ -34,7 +34,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",        // login/register
-                                "/api/courses/**"      // public course
+                                "/api/courses/**",     // public course
+                                "/static/**"           // ảnh courses, avatars
                         ).permitAll()
 
                         // admin
