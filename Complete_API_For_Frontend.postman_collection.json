@@ -1,0 +1,690 @@
+{
+  "info": {
+    "name": "Complete E-Learning API Collection",
+    "description": "Full API collection for E-Learning Platform - Frontend Integration",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "e-learning-complete-collection"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "userToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "courseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "chapterId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lessonId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. AUTHENTICATION",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    console.log('✅ Registered:', data.data.email);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"Password123\",\n  \"fullName\": \"Nguyễn Văn A\",\n  \"phoneNumber\": \"0123456789\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Login (User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('userToken', data.data.accessToken);",
+                  "    console.log('✅ Logged in as:', data.data.user.email);",
+                  "    console.log('Token:', data.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('adminToken', data.data.accessToken);",
+                  "    console.log('✅ Admin logged in');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/forgot-password"
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"token\": \"reset-token-from-email\",\n  \"newPassword\": \"NewPassword123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/reset-password"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. COURSES (Public)",
+      "item": [
+        {
+          "name": "Get All Courses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.data && data.data.length > 0) {",
+                  "        pm.collectionVariables.set('courseId', data.data[0].id);",
+                  "        console.log('✅ Found', data.data.length, 'courses');",
+                  "        console.log('Selected courseId:', data.data[0].id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/courses?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "courses"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "categoryCode",
+                  "value": "PROGRAM",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Course Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/courses/{{courseId}}"
+          }
+        },
+        {
+          "name": "Preview Curriculum - Chapters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.data && data.data.length > 0) {",
+                  "        pm.collectionVariables.set('chapterId', data.data[0].id);",
+                  "        console.log('✅ Found', data.data.length, 'chapters');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/curriculum/course/{{courseId}}/chapters"
+          }
+        },
+        {
+          "name": "Preview Curriculum - Lessons",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.data && data.data.length > 0) {",
+                  "        pm.collectionVariables.set('lessonId', data.data[0].id);",
+                  "        console.log('✅ Found', data.data.length, 'lessons');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/curriculum/chapters/{{chapterId}}/lessons"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. MY COURSES",
+      "item": [
+        {
+          "name": "Enroll Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/progress/enroll/{{courseId}}"
+          }
+        },
+        {
+          "name": "Get My Courses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/progress/my-courses"
+          }
+        },
+        {
+          "name": "Get Course Progress",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/progress/course/{{courseId}}"
+          }
+        },
+        {
+          "name": "Get Chapters with Progress",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/progress/course/{{courseId}}/chapters"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. LEARNING",
+      "item": [
+        {
+          "name": "Get Lesson Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}"
+          }
+        },
+        {
+          "name": "Update Video Progress (50%)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/progress?percent=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}", "progress"],
+              "query": [
+                {
+                  "key": "percent",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Video Progress (90% - Complete)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/progress?percent=90",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}", "progress"],
+              "query": [
+                {
+                  "key": "percent",
+                  "value": "90"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Next Lesson",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}/next"
+          }
+        },
+        {
+          "name": "Check Lesson Access",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}/access"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. QUIZ",
+      "item": [
+        {
+          "name": "Submit Quiz (FAIL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"answers\": [\n    {\n      \"questionId\": \"q1\",\n      \"selectedOptions\": [\"b\"]\n    },\n    {\n      \"questionId\": \"q2\",\n      \"selectedOptions\": [\"a\"]\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/lessons/quiz/submit"
+          }
+        },
+        {
+          "name": "Submit Quiz (PASS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"answers\": [\n    {\n      \"questionId\": \"q1\",\n      \"selectedOptions\": [\"a\"]\n    },\n    {\n      \"questionId\": \"q2\",\n      \"selectedOptions\": [\"a\"]\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/lessons/quiz/submit"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. FAVORITES",
+      "item": [
+        {
+          "name": "Add to Favorites",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"title\": \"Java Spring Boot từ A-Z\",\n  \"thumbnailUrl\": \"http://localhost:8080/uploads/products/java.jpg\",\n  \"price\": 2000000,\n  \"discountedPrice\": 1800000,\n  \"discountPercent\": 10,\n  \"level\": \"Advanced\",\n  \"duration\": 50,\n  \"instructorName\": \"Nguyễn Văn A\",\n  \"rating\": 4.8,\n  \"totalStudents\": 1250\n}"
+            },
+            "url": "{{baseUrl}}/api/favorites/add"
+          }
+        },
+        {
+          "name": "Get Favorites",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/favorites"
+          }
+        },
+        {
+          "name": "Remove from Favorites",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/favorites/{{courseId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. CART",
+      "item": [
+        {
+          "name": "Add to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"title\": \"Java Spring Boot từ A-Z\",\n  \"thumbnailUrl\": \"http://localhost:8080/uploads/products/java.jpg\",\n  \"price\": 2000000,\n  \"discountedPrice\": 1800000,\n  \"discountPercent\": 10,\n  \"instructorName\": \"Nguyễn Văn A\"\n}"
+            },
+            "url": "{{baseUrl}}/api/cart/add"
+          }
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/cart"
+          }
+        },
+        {
+          "name": "Remove from Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/cart/{{courseId}}"
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/cart/clear"
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. ORDERS",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"courseId\": \"{{courseId}}\",\n      \"title\": \"Java Spring Boot\",\n      \"price\": 1800000\n    }\n  ],\n  \"paymentMethod\": \"BANK_TRANSFER\",\n  \"totalAmount\": 1800000\n}"
+            },
+            "url": "{{baseUrl}}/api/orders/create"
+          }
+        },
+        {
+          "name": "Get My Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/orders/my-orders"
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. ADMIN - Course Management",
+      "item": [
+        {
+          "name": "Create Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryCode\": \"PROGRAM\",\n  \"title\": \"Java Spring Boot từ A-Z\",\n  \"description\": \"Khóa học Spring Boot toàn diện\",\n  \"price\": 2000000,\n  \"duration\": 50,\n  \"level\": \"Advanced\",\n  \"instructorName\": \"Nguyễn Văn A\",\n  \"thumbnailUrl\": \"http://localhost:8080/uploads/products/java.jpg\"\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/courses/create"
+          }
+        },
+        {
+          "name": "Update Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Java Spring Boot từ A-Z [UPDATED]\",\n  \"price\": 1800000\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/courses/{{courseId}}"
+          }
+        },
+        {
+          "name": "Delete Course",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/courses/{{courseId}}"
+          }
+        }
+      ]
+    }
+  ]
+}
+

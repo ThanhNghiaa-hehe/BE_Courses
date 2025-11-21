@@ -257,4 +257,343 @@ Response:
 Current: Lesson 5 (Chapter 1, order: 5) ← Lesson cuối chapter
   ↓
 Find: Chapter 2 (order > 1)
+  ↓
+Next: Lesson 6 (Chapter 2, order: 1) ← Lesson đầu chapter mới
+
+Response:
+{
+  "nextLesson": {
+    "id": "lesson6",
+    "title": "Bài 1: Giới thiệu CSS",
+    "chapterTitle": "Chương 2: CSS Cơ Bản",  ← Chapter mới
+    "order": 1,
+    "isUnlocked": false  ← Có thể bị lock nếu chưa pass quiz
+  },
+  "message": "Lesson hoàn thành! Chuyển sang chương tiếp theo."
+}
+```
+
+---
+
+### **Tình huống 3: Hoàn thành khóa học**
+
+```javascript
+// Lesson cuối cùng complete → Không có next lesson
+
+Current: Lesson 50 (Chapter 10, order: 5) ← Lesson cuối course
+  ↓
+Find: Không có chapter tiếp theo
+  ↓
+Next: null
+
+Response:
+{
+  "completed": true,
+  "totalProgress": 100,
+  "completedLessons": 50,
+  "totalLessons": 50,
+  "nextLesson": null,  ← Không có lesson tiếp
+  "message": "Chúc mừng! Bạn đã hoàn thành khóa học!",
+  "courseCompleted": true  ← Hoàn thành
+}
+```
+
+---
+
+### **Tình huống 4: Next lesson bị lock**
+
+```javascript
+// Lesson tiếp theo cần complete lesson trước
+
+Current: Lesson 2 complete
+  ↓
+Next: Lesson 3 (requiredPreviousLesson: "lesson2")
+  ↓
+Check: lesson2 đã complete? ✅ Yes
+  ↓
+isUnlocked: true
+
+Response:
+{
+  "nextLesson": {
+    "id": "lesson3",
+    "isUnlocked": true  ← Đã unlock
+  }
+}
+
+---
+
+// Nếu skip lesson 2
+Current: Lesson 1 complete
+  ↓
+Next: Lesson 3 (requiredPreviousLesson: "lesson2")
+  ↓
+Check: lesson2 đã complete? ❌ No
+  ↓
+isUnlocked: false
+
+Response:
+{
+  "nextLesson": {
+    "id": "lesson3",
+    "isUnlocked": false  ← Vẫn locked
+  },
+  "message": "Vui lòng hoàn thành Bài 2 trước."
+}
+```
+
+---
+
+## 🎨 FRONTEND INTEGRATION
+
+### **React Example - Auto Navigate**
+
+```jsx
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+function VideoPlayer({ lessonId }) {
+  const navigate = useNavigate();
+  const [showNextModal, setShowNextModal] = useState(false);
+  const [nextLesson, setNextLesson] = useState(null);
+
+  // Listen video progress
+  const handleVideoProgress = async (percent) => {
+    if (percent >= 90) {
+      // 1. Update progress (auto-complete)
+      await fetch(`/api/lessons/${lessonId}/progress?percent=${percent}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      // 2. Get next lesson info
+      const response = await fetch(`/api/lessons/${lessonId}/next`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+
+      if (data.data.nextLesson && data.data.nextLesson.isUnlocked) {
+        setNextLesson(data.data.nextLesson);
+        setShowNextModal(true);  // Show modal
+      } else if (data.data.courseCompleted) {
+        // Show congratulations
+        showCongrats();
+      }
+    }
+  };
+
+  const handleContinue = () => {
+    // Auto navigate to next lesson
+    navigate(`/lessons/${nextLesson.id}`);
+  };
+
+  return (
+    <div>
+      <VideoPlayer 
+        onProgress={handleVideoProgress}
+      />
+
+      {/* Modal Next Lesson */}
+      {showNextModal && (
+        <Modal>
+          <h2>✅ Hoàn thành bài học!</h2>
+          <p>Tiến độ: {totalProgress}%</p>
+          
+          <div className="next-lesson">
+            <h3>Bài tiếp theo:</h3>
+            <p>{nextLesson.title}</p>
+            <p>⏱️ {nextLesson.duration} phút</p>
+            <p>📚 {nextLesson.chapterTitle}</p>
+          </div>
+
+          <button onClick={handleContinue}>
+            Tiếp tục học →
+          </button>
+          <button onClick={() => setShowNextModal(false)}>
+            Học lại
+          </button>
+        </Modal>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+### **Vue Example - Auto Countdown**
+
+```vue
+<template>
+  <div>
+    <video-player @progress="handleProgress" />
+    
+    <!-- Auto redirect countdown -->
+    <div v-if="showAutoNext" class="auto-next">
+      <p>✅ Hoàn thành! Chuyển sang bài tiếp trong {{ countdown }}s...</p>
+      <p>{{ nextLesson.title }}</p>
+      <button @click="cancelAutoNext">Hủy</button>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      showAutoNext: false,
+      countdown: 5,
+      nextLesson: null
+    }
+  },
+  methods: {
+    async handleProgress(percent) {
+      if (percent >= 90) {
+        // Get next lesson
+        const response = await this.$http.get(`/api/lessons/${this.lessonId}/next`);
+        this.nextLesson = response.data.data.nextLesson;
+        
+        if (this.nextLesson?.isUnlocked) {
+          this.showAutoNext = true;
+          this.startCountdown();
+        }
+      }
+    },
+    
+    startCountdown() {
+      const timer = setInterval(() => {
+        this.countdown--;
+        if (this.countdown === 0) {
+          clearInterval(timer);
+          // Auto navigate
+          this.$router.push(`/lessons/${this.nextLesson.id}`);
+        }
+      }, 1000);
+    },
+    
+    cancelAutoNext() {
+      this.showAutoNext = false;
+      this.countdown = 5;
+    }
+  }
+}
+</script>
+```
+
+---
+
+## 📝 API ENDPOINTS
+
+### **Endpoint mới:**
+
+```http
+GET /api/lessons/{lessonId}/next
+Authorization: Bearer {token}
+
+Response:
+{
+  "success": true,
+  "message": "Next lesson info retrieved",
+  "data": {
+    "completed": true,
+    "totalProgress": 40,
+    "completedLessons": 2,
+    "totalLessons": 5,
+    "nextLesson": {
+      "id": "lesson3",
+      "title": "Bài 3: Thuộc tính HTML",
+      "description": "...",
+      "duration": 18,
+      "chapterId": "chapter1",
+      "chapterTitle": "Chương 1: HTML Cơ Bản",
+      "order": 3,
+      "isFree": false,
+      "hasQuiz": false,
+      "isUnlocked": true
+    },
+    "message": "Lesson hoàn thành! Chuyển sang bài tiếp theo.",
+    "courseCompleted": false
+  }
+}
+```
+
+---
+
+## ✅ CHECKLIST
+
+### Backend đã implement:
+- [x] LessonRepository.findNextLesson()
+- [x] ChapterRepository.findNextChapter()
+- [x] ProgressService.findNextLesson()
+- [x] ProgressService.createCompleteResponse()
+- [x] ProgressService.getNextLessonInfo()
+- [x] LessonUserController.getNextLessonInfo()
+- [x] LessonCompleteResponse DTO
+
+### Frontend cần làm:
+- [ ] Listen video progress event
+- [ ] Gọi API /next khi complete
+- [ ] Hiển thị modal next lesson
+- [ ] Button "Tiếp tục học"
+- [ ] Auto navigate (optional)
+- [ ] Countdown timer (optional)
+
+---
+
+## 🎯 TÓM TẮT
+
+### ❌ Trước khi update:
+```
+Video 90% → Complete ✅
+             ↓
+          [Dừng lại]
+          
+User phải tự:
+- Quay về danh sách lessons
+- Tìm lesson tiếp theo
+- Click vào lesson đó
+```
+
+### ✅ Sau khi update:
+```
+Video 90% → Complete ✅
+             ↓
+    GET /api/lessons/{id}/next
+             ↓
+    Response: {nextLesson info}
+             ↓
+    Frontend show modal:
+    ┌─────────────────────┐
+    │ ✅ Hoàn thành!      │
+    │ Bài tiếp: Bài 3     │
+    │ [Tiếp tục học] →    │
+    └─────────────────────┘
+             ↓
+    Click → Auto navigate
+             ↓
+    Lesson 3 auto play ▶️
+```
+
+---
+
+## 🚀 KẾT LUẬN
+
+✅ **Backend ĐÃ BỔ SUNG đầy đủ:**
+- Tìm lesson tiếp theo (cùng chapter hoặc chapter mới)
+- Check unlock status
+- Trả về thông tin đầy đủ cho Frontend
+- Handle case hết khóa học
+
+✅ **Frontend CHỈ CẦN:**
+- Gọi API `/api/lessons/{id}/next` sau khi complete
+- Hiển thị modal với info
+- Navigate đến lesson tiếp theo
+
+✅ **Trải nghiệm học tập:**
+- Seamless transition giữa các lessons
+- Không cần tìm kiếm thủ công
+- Rõ ràng về progress và next step
+- Có thể auto-play hoặc manual
+
+**🎉 Hoàn thành! User giờ có trải nghiệm học tập liền mạch!**
 

@@ -1,5 +1,7 @@
 package com.example.cake.lesson.controller;
 
+import com.example.cake.lesson.dto.ChapterProgressDTO;
+import com.example.cake.lesson.dto.MyCourseDTO;
 import com.example.cake.lesson.model.UserProgress;
 import com.example.cake.lesson.service.ProgressService;
 import com.example.cake.response.ResponseMessage;
@@ -7,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Controller for user progress tracking
@@ -44,6 +48,33 @@ public class ProgressController {
         String userId = "temp-user-id";
 
         return ResponseEntity.ok(progressService.getProgress(userId, courseId));
+    }
+
+    /**
+     * MY COURSES - Lấy danh sách khóa học đã đăng ký
+     */
+    @GetMapping("/my-courses")
+    public ResponseEntity<ResponseMessage<List<MyCourseDTO>>> getMyCourses(
+            Authentication authentication
+    ) {
+        String userEmail = authentication.getName();
+        String userId = "temp-user-id";
+
+        return ResponseEntity.ok(progressService.getMyCourses(userId));
+    }
+
+    /**
+     * Lấy danh sách chapters kèm progress của user
+     */
+    @GetMapping("/course/{courseId}/chapters")
+    public ResponseEntity<ResponseMessage<List<ChapterProgressDTO>>> getChaptersWithProgress(
+            @PathVariable String courseId,
+            Authentication authentication
+    ) {
+        String userEmail = authentication.getName();
+        String userId = "temp-user-id";
+
+        return ResponseEntity.ok(progressService.getChaptersWithProgress(userId, courseId));
     }
 }
 

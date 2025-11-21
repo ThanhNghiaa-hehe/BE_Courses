@@ -28,5 +28,10 @@ public interface ChapterRepository extends MongoRepository<Chapter, String> {
      * Xóa tất cả chapter của một khóa học
      */
     void deleteByCourseId(String courseId);
+
+    /**
+     * Tìm chapter tiếp theo trong course (theo order)
+     */
+    Chapter findFirstByCourseIdAndOrderGreaterThanOrderByOrderAsc(String courseId, Integer currentOrder);
 }
 

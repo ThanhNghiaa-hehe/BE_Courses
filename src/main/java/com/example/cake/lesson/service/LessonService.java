@@ -69,7 +69,7 @@ public class LessonService {
      * Lấy tất cả lesson của một chapter
      */
     public ResponseMessage<List<Lesson>> getLessonsByChapter(String chapterId) {
-        List<Lesson> lessons = lessonRepository.findByChapterIdOrderByOrderAsc(chapterId);
+        List<Lesson> lessons = lessonRepository.findAllByChapterIdOrderByOrderAsc(chapterId);
         return new ResponseMessage<>(true, "Success", lessons);
     }
 

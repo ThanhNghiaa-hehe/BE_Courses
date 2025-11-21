@@ -10,9 +10,9 @@ import java.util.List;
 public interface LessonRepository extends MongoRepository<Lesson, String> {
 
     /**
-     * Tìm tất cả lesson của một chapter
+     * Tìm tất cả lesson của một chapter (sắp xếp theo order)
      */
-    List<Lesson> findByChapterIdOrderByOrderAsc(String chapterId);
+    List<Lesson> findAllByChapterIdOrderByOrderAsc(String chapterId);
 
     /**
      * Tìm tất cả lesson của một khóa học
@@ -45,8 +45,23 @@ public interface LessonRepository extends MongoRepository<Lesson, String> {
     void deleteByChapterId(String chapterId);
 
     /**
-     * Xóa tất cả lesson của một khóa học
+     * Xóa tất cả lesson của một course
      */
     void deleteByCourseId(String courseId);
+
+    /**
+     * Tìm lesson tiếp theo trong cùng chapter (theo order)
+     */
+    Lesson findFirstByChapterIdAndOrderGreaterThanOrderByOrderAsc(String chapterId, Integer currentOrder);
+
+    /**
+     * Tìm TẤT CẢ lessons sau order hiện tại trong chapter (để check unlock)
+     */
+    List<Lesson> findByChapterIdAndOrderGreaterThanOrderByOrderAsc(String chapterId, Integer currentOrder);
+
+    /**
+     * Tìm lesson có order nhỏ nhất trong chapter (lesson đầu tiên)
+     */
+    Lesson findFirstByChapterIdOrderByOrderAsc(String chapterId);
 }
 

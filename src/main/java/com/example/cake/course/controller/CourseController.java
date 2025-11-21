@@ -11,6 +11,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.io.File;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -48,5 +51,41 @@ public class CourseController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<ResponseMessage<String>> deleteCourse(@PathVariable String id) {
         return ResponseEntity.ok(courseService.deleteCourse(id));
+    }
+    @PostMapping("/upload-thumbnail")
+    public ResponseEntity<?> uploadThumbnail(@RequestParam("file") MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("success", false, "message", "File is empty"));
+            }
+
+            // Tạo tên file unique
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String filename = System.currentTimeMillis() + extension;
+
+            // Lấy upload directory từ application.properties
+            String uploadDir = System.getProperty("user.dir") + "/uploads/courses/";
+            File directory = new File(uploadDir);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            // Lưu file
+            File destinationFile = new File(uploadDir + filename);
+            file.transferTo(destinationFile);
+
+            // Trả về URL theo format WebConfig serve
+            String fileUrl = "http://localhost:8080/static/courses/" + filename;
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", fileUrl
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 }

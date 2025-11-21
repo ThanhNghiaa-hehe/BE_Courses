@@ -118,7 +118,7 @@ public class ChapterService {
         Long totalLessons = lessonRepository.countByChapterId(chapterId);
 
         // Tính tổng thời lượng
-        List<Lesson> lessons = lessonRepository.findByChapterIdOrderByOrderAsc(chapterId);
+        List<Lesson> lessons = lessonRepository.findAllByChapterIdOrderByOrderAsc(chapterId);
         Integer totalDuration = lessons.stream()
                 .mapToInt(l -> l.getDuration() != null ? l.getDuration() : 0)
                 .sum();

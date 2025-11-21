@@ -1,5 +1,6 @@
 package com.example.cake.lesson.controller;
 
+import com.example.cake.lesson.dto.LessonCompleteResponse;
 import com.example.cake.lesson.dto.QuizResult;
 import com.example.cake.lesson.dto.QuizSubmission;
 import com.example.cake.lesson.model.Lesson;
@@ -107,5 +108,21 @@ public class LessonUserController {
 
         return ResponseEntity.ok(progressService.canAccessLesson(userId, id));
     }
+
+    /**
+     * Lấy thông tin lesson tiếp theo sau khi complete
+     */
+    @GetMapping("/{id}/next")
+    public ResponseEntity<ResponseMessage<LessonCompleteResponse>> getNextLessonInfo(
+            @PathVariable String id,
+            Authentication authentication
+    ) {
+        String userEmail = authentication.getName();
+        String userId = "temp-user-id";
+
+        ResponseMessage<LessonCompleteResponse> response = progressService.getNextLessonInfo(userId, id);
+        return ResponseEntity.ok(response);
+    }
 }
+
 
