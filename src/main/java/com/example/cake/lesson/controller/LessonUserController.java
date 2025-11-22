@@ -83,16 +83,21 @@ public class LessonUserController {
 
     /**
      * Nộp bài quiz
+     * @deprecated Use POST /api/quizzes/submit instead
+     * This endpoint redirects to new Quiz API
      */
+    @Deprecated
     @PostMapping("/quiz/submit")
     public ResponseEntity<ResponseMessage<QuizResult>> submitQuiz(
             @RequestBody QuizSubmission submission,
             Authentication authentication
     ) {
-        String userEmail = authentication.getName();
-        String userId = "temp-user-id";
-
-        return ResponseEntity.ok(progressService.submitQuiz(userId, submission));
+        // Return error message directing to new API
+        return ResponseEntity.ok(
+            new ResponseMessage<>(false,
+                "This API is deprecated. Please use POST /api/quizzes/submit with new format. See documentation for details.",
+                null)
+        );
     }
 
     /**

@@ -9,14 +9,15 @@ import com.example.cake.lesson.dto.QuizResult;
 import com.example.cake.lesson.dto.QuizSubmission;
 import com.example.cake.lesson.model.Chapter;
 import com.example.cake.lesson.model.Lesson;
-import com.example.cake.lesson.model.Quiz;
 import com.example.cake.lesson.model.UserProgress;
 import com.example.cake.lesson.repository.ChapterRepository;
 import com.example.cake.lesson.repository.LessonRepository;
 import com.example.cake.lesson.repository.UserProgressRepository;
+import com.example.cake.quiz.repository.QuizAttemptRepository;
 import com.example.cake.response.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,6 +34,7 @@ public class ProgressService {
     private final LessonRepository lessonRepository;
     private final ChapterRepository chapterRepository;
     private final CourseRepository courseRepository;
+    private final QuizAttemptRepository quizAttemptRepository;
 
     /**
      * Khởi tạo tiến độ khi user đăng ký khóa học
@@ -144,40 +146,27 @@ public class ProgressService {
 
     /**
      * Nộp bài quiz
+     * @deprecated Use QuizService.submitQuiz() instead
+     * This method will be removed in future versions
      */
+    @Deprecated
     public ResponseMessage<QuizResult> submitQuiz(String userId, QuizSubmission submission) {
-        Lesson lesson = lessonRepository.findById(submission.getLessonId()).orElse(null);
-        if (lesson == null || !Boolean.TRUE.equals(lesson.getHasQuiz())) {
-            return new ResponseMessage<>(false, "Quiz not found", null);
-        }
+        // TODO: Migrate to use QuizService
+        // For now, return error message directing users to new API
+        return new ResponseMessage<>(false,
+                "This API is deprecated. Please use POST /api/quizzes/submit with new format",
+                null);
+    }
 
-        UserProgress progress = progressRepository.findByUserIdAndCourseId(userId, lesson.getCourseId()).orElse(null);
-        if (progress == null) {
-            return new ResponseMessage<>(false, "Progress not found", null);
-        }
-
-        // Chấm điểm
-        QuizResult result = gradeQuiz(lesson.getQuiz(), submission);
-
-        // Cập nhật progress
-        UserProgress.LessonProgress lessonProgress = findOrCreateLessonProgress(progress, submission.getLessonId());
-        lessonProgress.setQuizScore(result.getScore());
-        lessonProgress.setQuizAttempts((lessonProgress.getQuizAttempts() != null ? lessonProgress.getQuizAttempts() : 0) + 1);
-
-        // Nếu pass quiz
-        if (Boolean.TRUE.equals(result.getPassed())) {
-            lessonProgress.setQuizPassedAt(LocalDateTime.now());
-            lessonProgress.setCompleted(true);
-            lessonProgress.setCompletedAt(LocalDateTime.now());
-            progress.markLessonComplete(submission.getLessonId());
-            updateTotalProgress(progress, lesson.getCourseId());
-        }
-
-        progress.setLastAccessedAt(LocalDateTime.now());
-        progressRepository.save(progress);
-
-        log.info("User {} submitted quiz for lesson {}, score: {}", userId, submission.getLessonId(), result.getScore());
-        return new ResponseMessage<>(true, "Quiz submitted", result);
+    /**
+     * OLD gradeQuiz method - DEPRECATED
+     * @deprecated Quiz grading is now handled by QuizService
+     */
+    @Deprecated
+    private QuizResult gradeQuizOld(QuizSubmission submission) {
+        // This method is deprecated
+        // Use QuizService.submitQuiz() instead
+        return null;
     }
 
     /**
@@ -280,53 +269,11 @@ public class ProgressService {
         }
     }
 
-    private QuizResult gradeQuiz(Quiz quiz, QuizSubmission submission) {
-        List<QuizResult.QuestionResult> results = new ArrayList<>();
-        int correctCount = 0;
-        int totalPoints = 0;
-        int earnedPoints = 0;
-
-        for (Quiz.Question question : quiz.getQuestions()) {
-            QuizSubmission.Answer userAnswer = submission.getAnswers().stream()
-                    .filter(a -> a.getQuestionId().equals(question.getId()))
-                    .findFirst()
-                    .orElse(null);
-
-            List<String> correctAnswers = question.getOptions().stream()
-                    .filter(opt -> Boolean.TRUE.equals(opt.getIsCorrect()))
-                    .map(Quiz.Option::getId)
-                    .collect(Collectors.toList());
-
-            List<String> userAnswers = userAnswer != null ? userAnswer.getSelectedOptions() : new ArrayList<>();
-            boolean correct = userAnswers.containsAll(correctAnswers) && correctAnswers.containsAll(userAnswers);
-
-            if (correct) {
-                correctCount++;
-                earnedPoints += (question.getPoints() != null ? question.getPoints() : 1);
-            }
-
-            totalPoints += (question.getPoints() != null ? question.getPoints() : 1);
-
-            results.add(QuizResult.QuestionResult.builder()
-                    .questionId(question.getId())
-                    .correct(correct)
-                    .userAnswers(userAnswers)
-                    .correctAnswers(correctAnswers)
-                    .explanation(question.getExplanation())
-                    .build());
-        }
-
-        int score = totalPoints > 0 ? (earnedPoints * 100 / totalPoints) : 0;
-        boolean passed = score >= quiz.getPassingScore();
-
-        return QuizResult.builder()
-                .score(score)
-                .totalQuestions(quiz.getQuestions().size())
-                .correctAnswers(correctCount)
-                .passed(passed)
-                .results(results)
-                .build();
-    }
+    /*
+     * OLD gradeQuiz - REMOVED
+     * Quiz grading is now handled by QuizService
+     * See: com.example.cake.quiz.service.QuizService.submitQuiz()
+     */
 
     /**
      * Tìm lesson tiếp theo sau khi complete
@@ -634,9 +581,14 @@ public class ProgressService {
             .reduce((first, second) -> second) // Lấy quiz cuối cùng
             .orElse(null);
 
-        if (finalQuiz != null) {
-            // Cần pass quiz cuối chapter trước
-            return progress.isLessonCompleted(finalQuiz.getId());
+        if (finalQuiz != null && finalQuiz.getQuizId() != null) {
+            // Cần PASS quiz cuối chapter trước (không chỉ complete)
+            // Check trong QuizAttempt xem đã pass chưa
+            boolean quizPassed = quizAttemptRepository.existsByUserIdAndQuizIdAndPassedTrue(
+                progress.getUserId(),
+                finalQuiz.getQuizId()
+            );
+            return quizPassed;
         } else {
             // Không có quiz → Chỉ cần complete tất cả lessons
             long completedInPrevious = lessonsInPreviousChapter.stream()

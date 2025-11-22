@@ -1,5 +1,7 @@
 package com.example.cake.lesson.controller;
 
+import com.example.cake.auth.model.User;
+import com.example.cake.auth.repository.UserRepository;
 import com.example.cake.lesson.dto.ChapterProgressDTO;
 import com.example.cake.lesson.dto.MyCourseDTO;
 import com.example.cake.lesson.model.UserProgress;
@@ -21,6 +23,17 @@ import java.util.List;
 public class ProgressController {
 
     private final ProgressService progressService;
+    private final UserRepository userRepository;
+
+    /**
+     * Helper method để lấy userId từ Authentication
+     */
+    private String getUserId(Authentication authentication) {
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getId();
+    }
 
     /**
      * Khởi tạo tiến độ khi user mua/đăng ký khóa học
@@ -30,9 +43,7 @@ public class ProgressController {
             @PathVariable String courseId,
             Authentication authentication
     ) {
-        String userEmail = authentication.getName();
-        String userId = "temp-user-id"; // TODO: Get from User service
-
+        String userId = getUserId(authentication);
         return ResponseEntity.ok(progressService.initializeProgress(userId, courseId));
     }
 
@@ -44,9 +55,7 @@ public class ProgressController {
             @PathVariable String courseId,
             Authentication authentication
     ) {
-        String userEmail = authentication.getName();
-        String userId = "temp-user-id";
-
+        String userId = getUserId(authentication);
         return ResponseEntity.ok(progressService.getProgress(userId, courseId));
     }
 
@@ -57,9 +66,7 @@ public class ProgressController {
     public ResponseEntity<ResponseMessage<List<MyCourseDTO>>> getMyCourses(
             Authentication authentication
     ) {
-        String userEmail = authentication.getName();
-        String userId = "temp-user-id";
-
+        String userId = getUserId(authentication);
         return ResponseEntity.ok(progressService.getMyCourses(userId));
     }
 
@@ -71,9 +78,7 @@ public class ProgressController {
             @PathVariable String courseId,
             Authentication authentication
     ) {
-        String userEmail = authentication.getName();
-        String userId = "temp-user-id";
-
+        String userId = getUserId(authentication);
         return ResponseEntity.ok(progressService.getChaptersWithProgress(userId, courseId));
     }
 }

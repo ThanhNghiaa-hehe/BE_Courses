@@ -36,3 +36,24 @@ jwt:
 app:
   upload-dir: uploads/
 
+# ============================================
+# VNPAY Payment Configuration
+# ============================================
+vnpay:
+  # Merchant Info (Merchant riêng của bạn)
+  tmn-code: 60SBCZFK
+  hash-secret: O59YV1KLUB235EX45L5CAFDK1Z1MZUXN
+
+  # VNPAY Gateway URLs
+  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+
+  # Callback URLs - DÙNG NGROK PUBLIC URL
+  return-url: https://marilyn-unsubordinated-avianna.ngrok-free.dev/api/payment/vnpay/return
+  ipn-url: https://marilyn-unsubordinated-avianna.ngrok-free.dev/api/payment/vnpay/ipn
+
+  # Payment Settings
+  version: 2.1.0
+  command: pay
+  order-type: other
+  currency-code: VND
+  locale: vn

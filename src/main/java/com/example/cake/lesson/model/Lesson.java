@@ -56,7 +56,8 @@ public class Lesson {
 
     // ========== QUIZ (OPTIONAL) ==========
     private Boolean hasQuiz;                // Có quiz hay không
-    private Quiz quiz;                      // Quiz (nếu có)
+    private String quizId;                  // Reference to Quiz entity (not embedded)
+    // Note: Quiz is now a separate entity in quizzes collection
 
     // ========== STATS ==========
     private Integer views;                  // Lượt xem

@@ -49,7 +49,8 @@ public class LessonService {
                 .codeSnippets(request.getCodeSnippets())
                 .attachments(request.getAttachments())
                 .hasQuiz(request.getHasQuiz() != null ? request.getHasQuiz() : false)
-                .quiz(request.getQuiz())
+                // Note: quizId will be set later when quiz is created via QuizService
+                .quizId(null)
                 .views(0)
                 .likes(0)
                 .createdAt(LocalDateTime.now())
@@ -131,7 +132,9 @@ public class LessonService {
         if (request.getAttachments() != null) lesson.setAttachments(request.getAttachments());
 
         if (request.getHasQuiz() != null) lesson.setHasQuiz(request.getHasQuiz());
-        if (request.getQuiz() != null) lesson.setQuiz(request.getQuiz());
+        // Note: Quiz is now a separate entity
+        // To add quiz to this lesson, use: POST /api/admin/quizzes/create with lessonId
+        // The quizId will be automatically set when quiz is created
 
         lesson.setUpdatedAt(LocalDateTime.now());
         lessonRepository.save(lesson);

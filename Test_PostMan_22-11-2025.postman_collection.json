@@ -1,0 +1,1865 @@
+{
+  "info": {
+    "name": "E-Learning API - Complete Collection 22/11/2025",
+    "description": "Complete Postman collection for E-Learning Platform - Updated November 23, 2025\nIncludes: Auth, Courses, Chapters, Lessons, Quiz (New Refactored), Progress, Cart, Payment (VNPAY), Favorites, User Profile, Admin User Management, Analytics, File Upload, Search & Filter\n\nTotal: 20 Modules | 100+ APIs\n\nNew in this version:\n- Payment - VNPAY Integration (6 APIs)\n- User Profile Management (4 APIs)\n- Admin User Management (6 APIs)\n- Analytics & Statistics (4 APIs)\n- Admin Order Management (3 APIs)\n- File Upload (2 APIs)\n- Search & Filter (3 APIs)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "elearning-complete-22-11-2025"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "userToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "temp-user-id",
+      "type": "string"
+    },
+    {
+      "key": "courseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "chapterId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lessonId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "quizId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cartId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. AUTHENTICATION",
+      "item": [
+        {
+          "name": "1.1. Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.success) {",
+                  "        console.log('✅ Registered user:', data.data.email);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"Password123\",\n  \"fullName\": \"Nguyễn Văn A\",\n  \"phoneNumber\": \"0123456789\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register",
+            "description": "Đăng ký tài khoản mới"
+          }
+        },
+        {
+          "name": "1.2. Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.success && data.data.accessToken) {",
+                  "        pm.collectionVariables.set('userToken', data.data.accessToken);",
+                  "        console.log('✅ User logged in:', data.data.user.email);",
+                  "        console.log('Token saved to collection variables');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Đăng nhập và nhận token"
+          }
+        },
+        {
+          "name": "1.3. Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.success && data.data.accessToken) {",
+                  "        pm.collectionVariables.set('adminToken', data.data.accessToken);",
+                  "        console.log('✅ Admin logged in');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Đăng nhập admin"
+          }
+        },
+        {
+          "name": "1.4. Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/forgot-password",
+            "description": "Quên mật khẩu - gửi email reset"
+          }
+        },
+        {
+          "name": "1.5. Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"token\": \"reset-token-from-email\",\n  \"newPassword\": \"NewPassword123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/reset-password",
+            "description": "Đặt lại mật khẩu mới"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. COURSES - Public APIs",
+      "item": [
+        {
+          "name": "2.1. Get All Courses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.data && data.data.length > 0) {",
+                  "        pm.collectionVariables.set('courseId', data.data[0].id);",
+                  "        console.log('✅ Found', data.data.length, 'courses');",
+                  "        console.log('Selected courseId:', data.data[0].id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/courses?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "courses"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Page number (0-based)"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "categoryCode",
+                  "value": "PROGRAM",
+                  "disabled": true,
+                  "description": "Filter by category"
+                }
+              ]
+            },
+            "description": "Lấy danh sách khóa học (public)"
+          }
+        },
+        {
+          "name": "2.2. Get Course Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/courses/{{courseId}}",
+            "description": "Lấy chi tiết khóa học kèm CourseOverview"
+          }
+        },
+        {
+          "name": "2.3. Search Courses by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/courses?categoryCode=PROGRAM",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "courses"],
+              "query": [
+                {
+                  "key": "categoryCode",
+                  "value": "PROGRAM"
+                }
+              ]
+            },
+            "description": "Tìm kiếm khóa học theo danh mục"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. CURRICULUM - Preview (Public)",
+      "item": [
+        {
+          "name": "3.1. Get Course Chapters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.data && data.data.length > 0) {",
+                  "        pm.collectionVariables.set('chapterId', data.data[0].id);",
+                  "        console.log('✅ Found', data.data.length, 'chapters');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/curriculum/course/{{courseId}}/chapters",
+            "description": "Xem chapters của course (preview - không cần login)"
+          }
+        },
+        {
+          "name": "3.2. Get Chapter Lessons",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.data && data.data.length > 0) {",
+                  "        const lessons = data.data;",
+                  "        const normalLesson = lessons.find(l => !l.hasQuiz);",
+                  "        const quizLesson = lessons.find(l => l.hasQuiz);",
+                  "        ",
+                  "        if (normalLesson) {",
+                  "            pm.collectionVariables.set('lessonId', normalLesson.id);",
+                  "        }",
+                  "        if (quizLesson && quizLesson.quizId) {",
+                  "            pm.collectionVariables.set('quizId', quizLesson.quizId);",
+                  "        }",
+                  "        console.log('✅ Found', lessons.length, 'lessons');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/curriculum/chapters/{{chapterId}}/lessons",
+            "description": "Xem lessons của chapter (preview)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. MY COURSES",
+      "item": [
+        {
+          "name": "4.1. Enroll Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/progress/enroll/{{courseId}}",
+            "description": "Đăng ký/Mua khóa học (sau khi thanh toán)"
+          }
+        },
+        {
+          "name": "4.2. Get My Courses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/progress/my-courses",
+            "description": "Lấy danh sách khóa học đã đăng ký kèm progress"
+          }
+        },
+        {
+          "name": "4.3. Get Course Progress",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/progress/course/{{courseId}}",
+            "description": "Lấy progress chi tiết của một khóa học"
+          }
+        },
+        {
+          "name": "4.4. Get Chapters with Progress",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/progress/course/{{courseId}}/chapters",
+            "description": "Lấy chapters kèm unlock status và progress"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. LEARNING - Lessons & Progress",
+      "item": [
+        {
+          "name": "5.1. Get Lesson Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}",
+            "description": "Lấy chi tiết lesson (video, content, quiz)"
+          }
+        },
+        {
+          "name": "5.2. Check Lesson Access",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}/access",
+            "description": "Check xem có quyền truy cập lesson không (unlock/lock)"
+          }
+        },
+        {
+          "name": "5.3. Update Video Progress (30%)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/progress?percent=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}", "progress"],
+              "query": [
+                {
+                  "key": "percent",
+                  "value": "30",
+                  "description": "Progress percentage (0-100)"
+                }
+              ]
+            },
+            "description": "Cập nhật tiến độ xem video"
+          }
+        },
+        {
+          "name": "5.4. Update Video Progress (90% - Auto Complete)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/{{lessonId}}/progress?percent=90",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "{{lessonId}}", "progress"],
+              "query": [
+                {
+                  "key": "percent",
+                  "value": "90",
+                  "description": ">=90% sẽ auto-complete lesson"
+                }
+              ]
+            },
+            "description": "Video đạt 90% → Auto-complete lesson"
+          }
+        },
+        {
+          "name": "5.5. Get Next Lesson",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}/next",
+            "description": "Lấy thông tin lesson tiếp theo sau khi complete"
+          }
+        },
+        {
+          "name": "5.6. Mark Lesson Complete",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}/complete",
+            "description": "Đánh dấu lesson hoàn thành (manual)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. QUIZ (New - Refactored)",
+      "item": [
+        {
+          "name": "6.1. Get Quiz for Student",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/quizzes/{{quizId}}",
+            "description": "Lấy quiz (ẩn đáp án đúng)"
+          }
+        },
+        {
+          "name": "6.2. Submit Quiz (PASS - 100%)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quizId\": \"{{quizId}}\",\n  \"answers\": [\n    {\n      \"questionId\": \"q1\",\n      \"selectedOptions\": [\"a\"]\n    },\n    {\n      \"questionId\": \"q2\",\n      \"selectedOptions\": [\"a\"]\n    }\n  ],\n  \"timeSpent\": 120,\n  \"startedAt\": \"2025-11-22T10:00:00\"\n}"
+            },
+            "url": "{{baseUrl}}/api/quizzes/submit",
+            "description": "Nộp quiz với đáp án đúng (PASS)"
+          }
+        },
+        {
+          "name": "6.3. Submit Quiz (FAIL - 50%)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quizId\": \"{{quizId}}\",\n  \"answers\": [\n    {\n      \"questionId\": \"q1\",\n      \"selectedOptions\": [\"b\"]\n    },\n    {\n      \"questionId\": \"q2\",\n      \"selectedOptions\": [\"a\"]\n    }\n  ],\n  \"timeSpent\": 90,\n  \"startedAt\": \"2025-11-22T10:00:00\"\n}"
+            },
+            "url": "{{baseUrl}}/api/quizzes/submit",
+            "description": "Nộp quiz với đáp án sai (FAIL)"
+          }
+        },
+        {
+          "name": "6.4. Get Quiz Attempts History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/quizzes/{{quizId}}/attempts",
+            "description": "Lấy lịch sử làm quiz của user"
+          }
+        },
+        {
+          "name": "6.5. Check Quiz Passed",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/quizzes/{{quizId}}/passed",
+            "description": "Check xem user đã pass quiz chưa"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. FAVORITES",
+      "item": [
+        {
+          "name": "7.1. Add to Favorites",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"title\": \"Java Spring Boot từ A-Z\",\n  \"thumbnailUrl\": \"http://localhost:8080/uploads/products/java.jpg\",\n  \"price\": 2000000,\n  \"discountedPrice\": 1800000,\n  \"discountPercent\": 10,\n  \"level\": \"Advanced\",\n  \"duration\": 50,\n  \"instructorName\": \"Nguyễn Văn A\",\n  \"rating\": 4.8,\n  \"totalStudents\": 1250\n}"
+            },
+            "url": "{{baseUrl}}/api/favorites/add",
+            "description": "Thêm khóa học vào yêu thích"
+          }
+        },
+        {
+          "name": "7.2. Get Favorites",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/favorites",
+            "description": "Lấy danh sách yêu thích"
+          }
+        },
+        {
+          "name": "7.3. Remove from Favorites",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/favorites/{{courseId}}",
+            "description": "Xóa khỏi yêu thích"
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. CART",
+      "item": [
+        {
+          "name": "8.1. Add to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"title\": \"Java Spring Boot từ A-Z\",\n  \"thumbnailUrl\": \"http://localhost:8080/uploads/products/java.jpg\",\n  \"price\": 2000000,\n  \"discountedPrice\": 1800000,\n  \"discountPercent\": 10,\n  \"instructorName\": \"Nguyễn Văn A\"\n}"
+            },
+            "url": "{{baseUrl}}/api/cart/add",
+            "description": "Thêm khóa học vào giỏ hàng"
+          }
+        },
+        {
+          "name": "8.2. Get Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.success && data.data) {",
+                  "        pm.collectionVariables.set('cartId', data.data.id || 'cart-id');",
+                  "        console.log('✅ Cart items:', data.data.totalItems);",
+                  "        console.log('Total:', data.data.totalPrice);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/cart",
+            "description": "Xem giỏ hàng"
+          }
+        },
+        {
+          "name": "8.3. Remove from Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/cart/{{courseId}}",
+            "description": "Xóa khóa học khỏi giỏ hàng"
+          }
+        },
+        {
+          "name": "8.4. Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/cart/clear",
+            "description": "Xóa tất cả giỏ hàng"
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. PAYMENT - VNPAY",
+      "item": [
+        {
+          "name": "9.1. Create Payment URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.success && data.data) {",
+                  "        pm.collectionVariables.set('paymentId', data.data.paymentId);",
+                  "        console.log('✅ Payment URL created');",
+                  "        console.log('Payment ID:', data.data.paymentId);",
+                  "        console.log('Payment URL:', data.data.paymentUrl);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderInfo\": \"Thanh toan khoa hoc\"\n}"
+            },
+            "url": "{{baseUrl}}/api/payment/vnpay/create",
+            "description": "Tạo link thanh toán VNPAY cho cart hiện tại"
+          }
+        },
+        {
+          "name": "9.2. VNPAY Return (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vnp_Amount\": \"360000000\",\n  \"vnp_BankCode\": \"NCB\",\n  \"vnp_BankTranNo\": \"VNP14145547\",\n  \"vnp_CardType\": \"ATM\",\n  \"vnp_OrderInfo\": \"Thanh toan khoa hoc\",\n  \"vnp_PayDate\": \"20251123101530\",\n  \"vnp_ResponseCode\": \"00\",\n  \"vnp_TmnCode\": \"60SBCZFK\",\n  \"vnp_TransactionNo\": \"14145547\",\n  \"vnp_TransactionStatus\": \"00\",\n  \"vnp_TxnRef\": \"{{paymentId}}\",\n  \"vnp_SecureHash\": \"abc123def456...\"\n}"
+            },
+            "url": "{{baseUrl}}/api/payment/vnpay/return",
+            "description": "Callback từ VNPAY khi thanh toán thành công (ResponseCode=00)"
+          }
+        },
+        {
+          "name": "9.3. VNPAY Return (Failed)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vnp_Amount\": \"360000000\",\n  \"vnp_BankCode\": \"NCB\",\n  \"vnp_OrderInfo\": \"Thanh toan khoa hoc\",\n  \"vnp_ResponseCode\": \"51\",\n  \"vnp_TmnCode\": \"60SBCZFK\",\n  \"vnp_TxnRef\": \"{{paymentId}}\",\n  \"vnp_SecureHash\": \"abc123def456...\"\n}"
+            },
+            "url": "{{baseUrl}}/api/payment/vnpay/return",
+            "description": "Callback từ VNPAY khi thanh toán thất bại (ResponseCode=51 - Không đủ tiền)"
+          }
+        },
+        {
+          "name": "9.4. VNPAY Return (Cancelled)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vnp_Amount\": \"360000000\",\n  \"vnp_BankCode\": \"NCB\",\n  \"vnp_OrderInfo\": \"Thanh toan khoa hoc\",\n  \"vnp_ResponseCode\": \"24\",\n  \"vnp_TmnCode\": \"60SBCZFK\",\n  \"vnp_TxnRef\": \"{{paymentId}}\",\n  \"vnp_SecureHash\": \"abc123def456...\"\n}"
+            },
+            "url": "{{baseUrl}}/api/payment/vnpay/return",
+            "description": "Callback từ VNPAY khi user hủy giao dịch (ResponseCode=24)"
+          }
+        },
+        {
+          "name": "9.5. VNPAY IPN Callback",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "vnp_Amount",
+                  "value": "360000000"
+                },
+                {
+                  "key": "vnp_BankCode",
+                  "value": "NCB"
+                },
+                {
+                  "key": "vnp_ResponseCode",
+                  "value": "00"
+                },
+                {
+                  "key": "vnp_TxnRef",
+                  "value": "{{paymentId}}"
+                },
+                {
+                  "key": "vnp_TransactionNo",
+                  "value": "14145547"
+                },
+                {
+                  "key": "vnp_SecureHash",
+                  "value": "abc123..."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/payment/vnpay/ipn",
+            "description": "IPN callback từ VNPAY server (server-to-server)"
+          }
+        },
+        {
+          "name": "9.6. Get Payment Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/payment/{{paymentId}}/status",
+            "description": "Kiểm tra trạng thái thanh toán"
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. ORDERS",
+      "item": [
+        {
+          "name": "10.1. Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"courseId\": \"{{courseId}}\",\n      \"title\": \"Java Spring Boot từ A-Z\",\n      \"price\": 1800000\n    }\n  ],\n  \"paymentMethod\": \"BANK_TRANSFER\",\n  \"totalAmount\": 1800000\n}"
+            },
+            "url": "{{baseUrl}}/api/orders/create",
+            "description": "Tạo đơn hàng (sẽ thay bằng thanh toán VNPAY)"
+          }
+        },
+        {
+          "name": "10.2. Get My Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/orders/my-orders",
+            "description": "Lấy danh sách đơn hàng"
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. ADMIN - Course Management",
+      "item": [
+        {
+          "name": "10.1. Create Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.success && data.data) {",
+                  "        pm.collectionVariables.set('courseId', data.data.id);",
+                  "        console.log('✅ Course created:', data.data.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryCode\": \"PROGRAM\",\n  \"title\": \"Java Spring Boot từ A-Z [Test 22/11/2025]\",\n  \"description\": \"Khóa học Spring Boot toàn diện từ cơ bản đến nâng cao\",\n  \"price\": 2000000,\n  \"duration\": 50,\n  \"level\": \"Advanced\",\n  \"instructorName\": \"Nguyễn Văn A\",\n  \"rating\": 4.8,\n  \"totalStudents\": 1250,\n  \"discountPercent\": 10,\n  \"discountedPrice\": 1800000,\n  \"isPublished\": true,\n  \"thumbnailUrl\": \"http://localhost:8080/uploads/products/java.jpg\",\n  \"overview\": {\n    \"description\": \"Học Spring Boot từ cơ bản đến nâng cao với các dự án thực tế\",\n    \"whatYouWillLearn\": [\n      \"Spring Boot Core\",\n      \"Spring Security & JWT\",\n      \"RESTful API Design\",\n      \"Database với JPA/Hibernate\",\n      \"Microservices Architecture\"\n    ],\n    \"requirements\": [\n      \"Biết Java cơ bản\",\n      \"Hiểu OOP\",\n      \"Biết HTML/CSS cơ bản\"\n    ],\n    \"targetAudience\": [\n      \"Sinh viên IT\",\n      \"Lập trình viên Java muốn học Spring Boot\",\n      \"Developer muốn chuyển sang Backend\"\n    ],\n    \"stats\": {\n      \"totalChapters\": 10,\n      \"totalLessons\": 50,\n      \"totalDuration\": 3000,\n      \"certificateProvided\": true\n    }\n  }\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/courses/create",
+            "description": "Tạo khóa học mới"
+          }
+        },
+        {
+          "name": "10.2. Get All Courses (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/courses",
+            "description": "Lấy tất cả khóa học (admin)"
+          }
+        },
+        {
+          "name": "10.3. Update Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Java Spring Boot từ A-Z [UPDATED 22/11]\",\n  \"price\": 1800000,\n  \"discountPercent\": 15,\n  \"discountedPrice\": 1530000\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/courses/{{courseId}}",
+            "description": "Cập nhật thông tin khóa học"
+          }
+        },
+        {
+          "name": "10.4. Delete Course",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/courses/{{courseId}}",
+            "description": "Xóa khóa học"
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. ADMIN - Chapter Management",
+      "item": [
+        {
+          "name": "11.1. Create Chapter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.success && data.data) {",
+                  "        pm.collectionVariables.set('chapterId', data.data.id);",
+                  "        console.log('✅ Chapter created:', data.data.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"title\": \"Chương 1: Giới thiệu Spring Boot\",\n  \"description\": \"Làm quen với Spring Boot framework và các khái niệm cơ bản\",\n  \"order\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/chapters/create",
+            "description": "Tạo chapter mới"
+          }
+        },
+        {
+          "name": "11.2. Get Chapter Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/chapters/{{chapterId}}",
+            "description": "Lấy chi tiết chapter"
+          }
+        },
+        {
+          "name": "11.3. Update Chapter",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Chương 1: Giới thiệu Spring Boot [UPDATED]\",\n  \"description\": \"Mô tả cập nhật\"\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/chapters/{{chapterId}}",
+            "description": "Cập nhật chapter"
+          }
+        },
+        {
+          "name": "11.4. Delete Chapter",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/chapters/{{chapterId}}",
+            "description": "Xóa chapter"
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. ADMIN - Lesson Management",
+      "item": [
+        {
+          "name": "12.1. Create Video Lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.success && data.data) {",
+                  "        pm.collectionVariables.set('lessonId', data.data.id);",
+                  "        console.log('✅ Lesson created:', data.data.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chapterId\": \"{{chapterId}}\",\n  \"courseId\": \"{{courseId}}\",\n  \"title\": \"Bài 1: Spring Boot là gì?\",\n  \"description\": \"Giới thiệu về Spring Boot framework và các ưu điểm\",\n  \"order\": 1,\n  \"duration\": 15,\n  \"isFree\": true,\n  \"videoUrl\": \"https://www.youtube.com/watch?v=9kohr6pMwag\",\n  \"videoType\": \"YOUTUBE\",\n  \"contentType\": \"MARKDOWN\",\n  \"content\": \"# Giới thiệu Spring Boot\\n\\nSpring Boot là framework Java giúp đơn giản hóa việc phát triển ứng dụng Spring.\",\n  \"hasQuiz\": false\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/lessons/create",
+            "description": "Tạo lesson video"
+          }
+        },
+        {
+          "name": "12.2. Create Lesson 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chapterId\": \"{{chapterId}}\",\n  \"courseId\": \"{{courseId}}\",\n  \"title\": \"Bài 2: Cài đặt môi trường\",\n  \"description\": \"Hướng dẫn cài đặt Java, IDE và Spring Boot\",\n  \"order\": 2,\n  \"duration\": 20,\n  \"isFree\": false,\n  \"requiredPreviousLesson\": \"{{lessonId}}\",\n  \"videoUrl\": \"https://www.youtube.com/watch?v=9kohr6pMwag\",\n  \"videoType\": \"YOUTUBE\",\n  \"hasQuiz\": false\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/lessons/create",
+            "description": "Tạo lesson 2 (cần complete lesson 1)"
+          }
+        },
+        {
+          "name": "12.3. Get Lesson Detail (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/lessons/{{lessonId}}",
+            "description": "Lấy chi tiết lesson"
+          }
+        },
+        {
+          "name": "12.4. Update Lesson",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Bài 1: Spring Boot là gì? [UPDATED]\",\n  \"duration\": 18\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/lessons/{{lessonId}}",
+            "description": "Cập nhật lesson"
+          }
+        },
+        {
+          "name": "12.5. Delete Lesson",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/lessons/{{lessonId}}",
+            "description": "Xóa lesson"
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. ADMIN - Quiz Management (NEW)",
+      "item": [
+        {
+          "name": "13.1. Create Quiz for Lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.success && data.data) {",
+                  "        pm.collectionVariables.set('quizId', data.data.id);",
+                  "        console.log('✅ Quiz created:', data.data.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"courseId\": \"{{courseId}}\",\n  \"chapterId\": \"{{chapterId}}\",\n  \"title\": \"Quiz Chương 1: Kiểm tra kiến thức\",\n  \"description\": \"Kiểm tra kiến thức về Spring Boot cơ bản\",\n  \"passingScore\": 70,\n  \"timeLimit\": 10,\n  \"maxAttempts\": 3,\n  \"questions\": [\n    {\n      \"id\": \"q1\",\n      \"question\": \"Spring Boot là gì?\",\n      \"type\": \"SINGLE_CHOICE\",\n      \"options\": [\n        {\n          \"id\": \"a\",\n          \"text\": \"Java Framework giúp đơn giản hóa việc phát triển Spring\",\n          \"isCorrect\": true\n        },\n        {\n          \"id\": \"b\",\n          \"text\": \"Database Management System\",\n          \"isCorrect\": false\n        },\n        {\n          \"id\": \"c\",\n          \"text\": \"Frontend Framework\",\n          \"isCorrect\": false\n        }\n      ],\n      \"points\": 1,\n      \"explanation\": \"Spring Boot là framework Java giúp đơn giản hóa việc cấu hình và phát triển ứng dụng Spring\"\n    },\n    {\n      \"id\": \"q2\",\n      \"question\": \"Annotation nào được dùng để đánh dấu class chính trong Spring Boot?\",\n      \"type\": \"SINGLE_CHOICE\",\n      \"options\": [\n        {\n          \"id\": \"a\",\n          \"text\": \"@SpringBootApplication\",\n          \"isCorrect\": true\n        },\n        {\n          \"id\": \"b\",\n          \"text\": \"@MainClass\",\n          \"isCorrect\": false\n        },\n        {\n          \"id\": \"c\",\n          \"text\": \"@Start\",\n          \"isCorrect\": false\n        }\n      ],\n      \"points\": 1,\n      \"explanation\": \"@SpringBootApplication là annotation chính để đánh dấu class start của ứng dụng Spring Boot\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/quizzes/create",
+            "description": "Tạo quiz mới cho lesson (Quiz riêng biệt, không embedded)"
+          }
+        },
+        {
+          "name": "13.2. Get Quiz (Admin - with answers)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/quizzes/{{quizId}}",
+            "description": "Lấy quiz kèm đáp án (admin)"
+          }
+        },
+        {
+          "name": "13.3. Update Quiz",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Quiz Chương 1 [UPDATED]\",\n  \"passingScore\": 75,\n  \"maxAttempts\": 5\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/quizzes/{{quizId}}",
+            "description": "Cập nhật quiz"
+          }
+        },
+        {
+          "name": "13.4. Delete Quiz",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/quizzes/{{quizId}}",
+            "description": "Xóa quiz"
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. USER PROFILE",
+      "item": [
+        {
+          "name": "14.1. Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/profile",
+            "description": "Lấy thông tin profile của user hiện tại"
+          }
+        },
+        {
+          "name": "14.2. Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nguyễn Văn A Updated\",\n  \"phoneNumber\": \"0987654321\",\n  \"bio\": \"Lập trình viên Java\",\n  \"avatarUrl\": \"http://localhost:8080/uploads/avatars/avatar.jpg\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/profile",
+            "description": "Cập nhật thông tin profile"
+          }
+        },
+        {
+          "name": "14.3. Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Password123\",\n  \"newPassword\": \"NewPassword456\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/change-password",
+            "description": "Đổi mật khẩu (yêu cầu nhập mật khẩu cũ)"
+          }
+        },
+        {
+          "name": "14.4. Upload Avatar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "/path/to/avatar.jpg",
+                  "description": "Avatar image file"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/users/upload-avatar",
+            "description": "Upload ảnh đại diện (multipart/form-data)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "16. ADMIN - User Management",
+      "item": [
+        {
+          "name": "15.1. Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Page number"
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "role",
+                  "value": "USER",
+                  "disabled": true,
+                  "description": "Filter by role (USER/ADMIN)"
+                }
+              ]
+            },
+            "description": "Lấy danh sách tất cả users (admin)"
+          }
+        },
+        {
+          "name": "15.2. Get User Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/users/{{userId}}",
+            "description": "Xem chi tiết thông tin user"
+          }
+        },
+        {
+          "name": "15.3. Block User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/users/{{userId}}/block",
+            "description": "Khóa tài khoản user (user không thể login)"
+          }
+        },
+        {
+          "name": "15.4. Unblock User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/users/{{userId}}/unblock",
+            "description": "Mở khóa tài khoản user"
+          }
+        },
+        {
+          "name": "15.5. Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/users/{{userId}}",
+            "description": "Xóa user (cẩn thận!)"
+          }
+        },
+        {
+          "name": "15.6. Search Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/search?keyword=nguyen",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", "search"],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "nguyen",
+                  "description": "Search by name or email"
+                }
+              ]
+            },
+            "description": "Tìm kiếm user theo tên hoặc email"
+          }
+        }
+      ]
+    },
+    {
+      "name": "17. ADMIN - Analytics & Statistics",
+      "item": [
+        {
+          "name": "16.1. Dashboard Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/stats/dashboard",
+            "description": "Thống kê tổng quan: tổng users, courses, revenue, enrollments..."
+          }
+        },
+        {
+          "name": "16.2. Course Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/stats/courses",
+            "description": "Thống kê theo khóa học: enrollment count, completion rate..."
+          }
+        },
+        {
+          "name": "16.3. Revenue Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/stats/revenue?startDate=2025-01-01&endDate=2025-12-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "stats", "revenue"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2025-01-01",
+                  "description": "Start date (YYYY-MM-DD)"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2025-12-31",
+                  "description": "End date (YYYY-MM-DD)"
+                }
+              ]
+            },
+            "description": "Thống kê doanh thu theo khoảng thời gian"
+          }
+        },
+        {
+          "name": "16.4. User Growth",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/stats/user-growth",
+            "description": "Thống kê tăng trưởng user theo tháng"
+          }
+        }
+      ]
+    },
+    {
+      "name": "18. ADMIN - Order Management",
+      "item": [
+        {
+          "name": "17.1. Get All Orders (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/orders?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": true,
+                  "description": "Filter by status"
+                }
+              ]
+            },
+            "description": "Lấy tất cả orders (admin)"
+          }
+        },
+        {
+          "name": "17.2. Get Order Detail (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/admin/orders/{{orderId}}",
+            "description": "Xem chi tiết order"
+          }
+        },
+        {
+          "name": "17.3. Update Order Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\"\n}"
+            },
+            "url": "{{baseUrl}}/api/admin/orders/{{orderId}}/status",
+            "description": "Cập nhật trạng thái order (PENDING/COMPLETED/CANCELLED)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "19. FILE UPLOAD",
+      "item": [
+        {
+          "name": "18.1. Upload Course Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "/path/to/course-image.jpg",
+                  "description": "Course thumbnail image"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/upload/course-image",
+            "description": "Upload ảnh khóa học (thumbnail)"
+          }
+        },
+        {
+          "name": "18.2. Upload Product Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "/path/to/product-image.jpg",
+                  "description": "Product image file"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/upload/product-image",
+            "description": "Upload ảnh sản phẩm"
+          }
+        }
+      ]
+    },
+    {
+      "name": "20. SEARCH & FILTER",
+      "item": [
+        {
+          "name": "19.1. Search Courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/courses/search?keyword=spring&level=Advanced&minPrice=0&maxPrice=2000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "courses", "search"],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "spring",
+                  "description": "Search keyword (title, description)"
+                },
+                {
+                  "key": "level",
+                  "value": "Advanced",
+                  "description": "Filter by level"
+                },
+                {
+                  "key": "minPrice",
+                  "value": "0",
+                  "description": "Minimum price"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "2000000",
+                  "description": "Maximum price"
+                }
+              ]
+            },
+            "description": "Tìm kiếm khóa học với filters nâng cao"
+          }
+        },
+        {
+          "name": "19.2. Filter by Level",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/courses?level=Beginner",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "courses"],
+              "query": [
+                {
+                  "key": "level",
+                  "value": "Beginner",
+                  "description": "Beginner/Intermediate/Advanced"
+                }
+              ]
+            },
+            "description": "Lọc khóa học theo level"
+          }
+        },
+        {
+          "name": "19.3. Sort Courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/courses?sortBy=price&order=asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "courses"],
+              "query": [
+                {
+                  "key": "sortBy",
+                  "value": "price",
+                  "description": "Sort field (price/rating/createdAt)"
+                },
+                {
+                  "key": "order",
+                  "value": "asc",
+                  "description": "Sort order (asc/desc)"
+                }
+              ]
+            },
+            "description": "Sắp xếp khóa học"
+          }
+        }
+      ]
+    }
+  ]
+}
+
