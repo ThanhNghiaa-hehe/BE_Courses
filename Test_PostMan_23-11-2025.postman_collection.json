@@ -1081,7 +1081,26 @@
 			"name": "10. QUIZ (Admin)",
 			"item": [
 				{
-					"name": "10.1. Create Quiz",
+					"name": "10.1. Get All Quizzes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/quizzes/all",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "quizzes", "all"]
+						},
+						"description": "Get all quizzes in the system (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "10.2. Create Quiz",
 					"event": [
 						{
 							"listen": "test",
@@ -1113,7 +1132,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"title\": \"Kiểm tra useState Hook\",\n  \"description\": \"Bài kiểm tra về useState hook\",\n  \"passingScore\": 70,\n  \"timeLimit\": 600,\n  \"questions\": [\n    {\n      \"questionText\": \"useState hook dùng để làm gì?\",\n      \"questionType\": \"SINGLE_CHOICE\",\n      \"options\": [\n        {\n          \"text\": \"Quản lý state\",\n          \"isCorrect\": true\n        },\n        {\n          \"text\": \"Gọi API\",\n          \"isCorrect\": false\n        }\n      ],\n      \"points\": 10\n    }\n  ]\n}"
+							"raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"courseId\": \"{{courseId}}\",\n  \"chapterId\": \"{{chapterId}}\",\n  \"title\": \"Kiểm tra useState Hook\",\n  \"description\": \"Bài kiểm tra về useState hook\",\n  \"passingScore\": 70,\n  \"timeLimit\": 600,\n  \"maxAttempts\": 3,\n  \"questions\": [\n    {\n      \"id\": \"q1\",\n      \"question\": \"useState hook dùng để làm gì?\",\n      \"type\": \"SINGLE_CHOICE\",\n      \"points\": 10,\n      \"explanation\": \"useState là hook để quản lý state trong functional component\",\n      \"options\": [\n        {\n          \"id\": \"opt1\",\n          \"text\": \"Quản lý state\",\n          \"isCorrect\": true\n        },\n        {\n          \"id\": \"opt2\",\n          \"text\": \"Gọi API\",\n          \"isCorrect\": false\n        },\n        {\n          \"id\": \"opt3\",\n          \"text\": \"Tạo side effect\",\n          \"isCorrect\": false\n        }\n      ]\n    },\n    {\n      \"id\": \"q2\",\n      \"question\": \"Cú pháp nào đúng để khai báo useState?\",\n      \"type\": \"SINGLE_CHOICE\",\n      \"points\": 10,\n      \"explanation\": \"Cú pháp đúng là const [state, setState] = useState(initialValue)\",\n      \"options\": [\n        {\n          \"id\": \"opt4\",\n          \"text\": \"const [state, setState] = useState(0)\",\n          \"isCorrect\": true\n        },\n        {\n          \"id\": \"opt5\",\n          \"text\": \"const state = useState(0)\",\n          \"isCorrect\": false\n        }\n      ]\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/admin/quizzes/create",
@@ -1124,7 +1143,7 @@
 					"response": []
 				},
 				{
-					"name": "10.2. Get Quiz By ID (Admin)",
+					"name": "10.3. Get Quiz By ID (Admin)",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1142,7 +1161,7 @@
 					"response": []
 				},
 				{
-					"name": "10.3. Update Quiz",
+					"name": "10.4. Update Quiz",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -1168,7 +1187,7 @@
 					"response": []
 				},
 				{
-					"name": "10.4. Delete Quiz",
+					"name": "10.5. Delete Quiz",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -1224,7 +1243,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"quizId\": \"{{quizId}}\",\n  \"answers\": [\n    {\n      \"questionId\": \"question_id\",\n      \"selectedOptions\": [0]\n    }\n  ]\n}"
+							"raw": "{\n  \"quizId\": \"{{quizId}}\",\n  \"answers\": [\n    {\n      \"questionId\": \"q1\",\n      \"selectedOptions\": [\"opt1\"]\n    },\n    {\n      \"questionId\": \"q2\",\n      \"selectedOptions\": [\"opt4\"]\n    }\n  ],\n  \"timeSpent\": 120,\n  \"startedAt\": \"2025-11-23T10:00:00\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/quizzes/submit",

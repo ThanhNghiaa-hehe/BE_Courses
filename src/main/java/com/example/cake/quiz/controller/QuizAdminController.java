@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * Admin controller for quiz management
  */
@@ -18,6 +20,16 @@ import org.springframework.web.bind.annotation.*;
 public class QuizAdminController {
 
     private final QuizService quizService;
+
+    /**
+     * Get all quizzes (admin)
+     */
+    @GetMapping("/all")
+    public ResponseEntity<ResponseMessage<List<Quiz>>> getAllQuizzes(
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(quizService.getAllQuizzes());
+    }
 
     /**
      * Create quiz
@@ -64,4 +76,3 @@ public class QuizAdminController {
         return ResponseEntity.ok(quizService.deleteQuiz(quizId));
     }
 }
-

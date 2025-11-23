@@ -1,5 +1,6 @@
 package com.example.cake.quiz.dto;
 
+import com.example.cake.quiz.model.Quiz;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,9 +24,9 @@ public class QuizRequest {
     private String title;
     private String description;
 
-    private Integer passingScore;
-    private Integer timeLimit;
-    private Integer maxAttempts;
+    private Integer passingScore;  // Default: 70
+    private Integer timeLimit;     // In seconds, default: 600 (10 minutes)
+    private Integer maxAttempts;   // null = unlimited
 
     private List<QuestionRequest> questions;
 
@@ -34,12 +35,12 @@ public class QuizRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class QuestionRequest {
-        private String id;
-        private String question;
-        private String type; // SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE
+        private String id;              // Optional for update
+        private String question;        // Question text
+        private String type;            // "SINGLE_CHOICE", "MULTIPLE_CHOICE", "TRUE_FALSE"
         private List<OptionRequest> options;
-        private Integer points;
-        private String explanation;
+        private Integer points;         // Points for this question
+        private String explanation;     // Explanation when wrong
     }
 
     @Data

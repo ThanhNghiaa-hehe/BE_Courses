@@ -27,6 +27,15 @@ public class QuizService {
     private final com.example.cake.lesson.service.ProgressService progressService;
 
     /**
+     * Get all quizzes (admin)
+     */
+    public ResponseMessage<List<Quiz>> getAllQuizzes() {
+        List<Quiz> quizzes = quizRepository.findAll();
+        log.info("Retrieved {} quizzes", quizzes.size());
+        return new ResponseMessage<>(true, "Success", quizzes);
+    }
+
+    /**
      * Create quiz
      */
     public ResponseMessage<Quiz> createQuiz(QuizRequest request) {
@@ -330,4 +339,3 @@ public class QuizService {
         }
     }
 }
-

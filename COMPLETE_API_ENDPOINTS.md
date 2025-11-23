@@ -983,25 +983,56 @@ Content-Type: application/json
 Body:
 {
   "lessonId": "lesson_id",
+  "courseId": "course_id",
+  "chapterId": "chapter_id",
   "title": "Kiểm tra useState Hook",
   "description": "Bài kiểm tra về useState hook",
   "passingScore": 70,
   "timeLimit": 600,
+  "maxAttempts": 3,
   "questions": [
     {
-      "questionText": "useState hook dùng để làm gì?",
-      "questionType": "SINGLE_CHOICE",
+      "id": "q1",
+      "question": "useState hook dùng để làm gì?",
+      "type": "SINGLE_CHOICE",
+      "points": 10,
+      "explanation": "useState là hook để quản lý state trong functional component",
       "options": [
         {
+          "id": "opt1",
           "text": "Quản lý state",
           "isCorrect": true
         },
         {
+          "id": "opt2",
           "text": "Gọi API",
           "isCorrect": false
+        },
+        {
+          "id": "opt3",
+          "text": "Tạo side effect",
+          "isCorrect": false
         }
-      ],
-      "points": 10
+      ]
+    },
+    {
+      "id": "q2",
+      "question": "Cú pháp nào đúng để khai báo useState?",
+      "type": "SINGLE_CHOICE",
+      "points": 10,
+      "explanation": "Cú pháp đúng là const [state, setState] = useState(initialValue)",
+      "options": [
+        {
+          "id": "opt4",
+          "text": "const [state, setState] = useState(0)",
+          "isCorrect": true
+        },
+        {
+          "id": "opt5",
+          "text": "const state = useState(0)",
+          "isCorrect": false
+        }
+      ]
     }
   ]
 }
@@ -1009,10 +1040,25 @@ Body:
 Response:
 {
   "success": true,
-  "message": "Tạo quiz thành công",
-  "data": {...}
+  "message": "Quiz created successfully",
+  "data": {
+    "id": "quiz_id",
+    "lessonId": "lesson_id",
+    "title": "Kiểm tra useState Hook",
+    "passingScore": 70,
+    "timeLimit": 600,
+    "maxAttempts": 3,
+    "questions": [...]
+  }
 }
 ```
+
+**Important Notes:**
+- `type`: Must be "SINGLE_CHOICE", "MULTIPLE_CHOICE", or "TRUE_FALSE"
+- `id` fields: Required for question and option IDs (used in submit)
+- `explanation`: Shown when user answers incorrectly
+- `timeLimit`: In seconds (e.g., 600 = 10 minutes)
+- `maxAttempts`: null = unlimited attempts
 
 ### 10.2. Get Quiz By ID (Admin)
 ```http
@@ -1079,29 +1125,45 @@ Authorization: Bearer {user_token}
 Response:
 {
   "success": true,
-  "message": "Lấy quiz thành công",
+  "message": "Success",
   "data": {
     "id": "quiz_id",
+    "lessonId": "lesson_id",
     "title": "Kiểm tra useState Hook",
+    "description": "Bài kiểm tra về useState hook",
     "passingScore": 70,
     "timeLimit": 600,
+    "maxAttempts": 3,
     "questions": [
       {
-        "id": "question_id",
-        "questionText": "useState hook dùng để làm gì?",
-        "questionType": "SINGLE_CHOICE",
+        "id": "q1",
+        "question": "useState hook dùng để làm gì?",
+        "type": "SINGLE_CHOICE",
+        "points": 10,
+        "explanation": null,
         "options": [
           {
-            "text": "Quản lý state"
-            // isCorrect hidden
+            "id": "opt1",
+            "text": "Quản lý state",
+            "isCorrect": null
+          },
+          {
+            "id": "opt2",
+            "text": "Gọi API",
+            "isCorrect": null
+          },
+          {
+            "id": "opt3",
+            "text": "Tạo side effect",
+            "isCorrect": null
           }
-        ],
-        "points": 10
+        ]
       }
     ]
   }
 }
 ```
+**Note:** `isCorrect` is hidden (null) for students to prevent cheating
 
 ### 11.2. Submit Quiz
 ```http
@@ -1114,25 +1176,61 @@ Body:
   "quizId": "quiz_id",
   "answers": [
     {
-      "questionId": "question_id",
-      "selectedOptions": [0]
+      "questionId": "q1",
+      "selectedOptions": ["opt1"]
+    },
+    {
+      "questionId": "q2",
+      "selectedOptions": ["opt4"]
     }
-  ]
+  ],
+  "timeSpent": 120,
+  "startedAt": "2025-11-23T10:00:00"
 }
 
 Response:
 {
   "success": true,
-  "message": "Nộp bài thành công",
+  "message": "Quiz submitted successfully",
   "data": {
-    "quizId": "quiz_id",
-    "userId": "user_id",
-    "score": 80,
-    "passingScore": 70,
+    "attemptId": "attempt_id",
+    "attemptNumber": 1,
+    "score": 20,
+    "totalScore": 20,
+    "percentage": 100.0,
     "passed": true,
-    "totalQuestions": 10,
-    "correctAnswers": 8,
-    "submittedAt": "2025-11-23T16:00:00"
+    "message": "🎉 Chúc mừng! Bạn đã đạt 100% và PASS quiz!",
+    "remainingAttempts": 2,
+    "results": [
+      {
+        "questionId": "q1",
+        "question": "useState hook dùng để làm gì?",
+        "selectedOptions": ["opt1"],
+        "correctAnswers": ["opt1"],
+        "isCorrect": true,
+        "pointsEarned": 10,
+        "totalPoints": 10,
+        "explanation": "useState là hook để quản lý state trong functional component"
+      },
+      {
+        "questionId": "q2",
+        "question": "Cú pháp nào đúng để khai báo useState?",
+        "selectedOptions": ["opt4"],
+        "correctAnswers": ["opt4"],
+        "isCorrect": true,
+        "pointsEarned": 10,
+        "totalPoints": 10,
+        "explanation": "Cú pháp đúng là const [state, setState] = useState(initialValue)"
+      }
+    ]
+  }
+}
+```
+
+**Important:**
+- `selectedOptions`: Array of option IDs (not indices!)
+- `timeSpent`: Time in seconds
+- Response includes detailed results with explanations
   }
 }
 ```
@@ -1640,23 +1738,24 @@ These endpoints are **DISABLED** (not available):
 
 ---
 
-## 🆕 Latest Changes (Nov 23, 2025)
+## 🆕 Latest Changes
 
-### Added:
+### November 24, 2025:
+1. ✅ `GET /api/admin/quizzes/all` - Get all quizzes (admin)
+2. ✅ Next lesson API now includes videoUrl, videoId, videoThumbnail
+3. ✅ Quiz endpoints format fixed (question, type, option IDs)
+
+### November 23, 2025:
 1. ✅ `GET /api/lessons/{id}/progress` - Get saved video progress from database
 2. ✅ Video progress tracking: Auto-complete at 90%
 3. ✅ Quiz integration with progress (unlock chapter requirement)
 4. ✅ Access control: Check 90% video requirement for unlock
-
-### Fixed:
-1. ✅ Video progress now uses real userId (not temp-user-id)
-2. ✅ Quiz submit updates UserProgress.quizPassedAt
-3. ✅ Clear messages about 90% requirement
-4. ✅ Quiz passed check before unlocking next chapter
-
-### Removed:
-1. ❌ All Cart endpoints (replaced by direct payment)
-2. ❌ All Order endpoints (replaced by direct payment)
+5. ✅ Video progress now uses real userId (not temp-user-id)
+6. ✅ Quiz submit updates UserProgress.quizPassedAt
+7. ✅ Clear messages about 90% requirement
+8. ✅ Quiz passed check before unlocking next chapter
+9. ❌ Removed: All Cart endpoints (replaced by direct payment)
+10. ❌ Removed: All Order endpoints (replaced by direct payment)
 
 ---
 
@@ -1693,7 +1792,7 @@ All APIs follow this format:
 
 ---
 
-**Last Updated:** November 23, 2025  
-**Total Endpoints:** 76 Active + 10 Deprecated = 86 Total  
+**Last Updated:** November 24, 2025  
+**Total Endpoints:** 77 Active + 10 Deprecated = 87 Total  
 **Status:** ✅ Production Ready
 
