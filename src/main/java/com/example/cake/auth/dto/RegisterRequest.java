@@ -1,7 +1,7 @@
     package com.example.cake.auth.dto;
     import com.fasterxml.jackson.annotation.JsonProperty;
-    import lombok.Data;
     import jakarta.validation.constraints.*;
+    import lombok.Data;
 
     @Data
     public class RegisterRequest {
@@ -17,9 +17,8 @@
 
 
         @NotBlank(message = "Họ tên không được để trống")
-        @JsonProperty(value = "fullname")
         private String fullname;
-
+        @JsonProperty(value = "fullname")
 
         @NotBlank(message = "Số điện thoại không được để trống")
         @Pattern(regexp = "0\\d{9}", message = "Số điện thoại không hợp lệ")

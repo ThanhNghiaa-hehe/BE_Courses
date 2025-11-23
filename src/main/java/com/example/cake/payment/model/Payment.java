@@ -8,9 +8,11 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Payment entity - Track payment transactions
+ * Updated: Removed cart/order dependency, stores course info directly
  */
 @Document(collection = "payments")
 @Data
@@ -23,7 +25,9 @@ public class Payment {
     private String id;
 
     private String userId;
-    private String cartId;
+
+    // Course information - stored directly in payment
+    private List<PaymentCourseItem> courses;  // List of courses being purchased
 
     // VNPAY transaction info
     private Long amount;                    // Số tiền (VNĐ)
@@ -60,6 +64,24 @@ public class Payment {
         VNPAY,
         MOMO,
         BANK_TRANSFER
+    }
+
+    /**
+     * Payment Course Item - Store course info in payment
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PaymentCourseItem {
+        private String courseId;
+        private String title;
+        private String thumbnailUrl;
+        private Double price;              // Giá gốc
+        private Double discountedPrice;    // Giá sau giảm
+        private Integer discountPercent;   // % giảm giá
+        private String instructorName;
+        private String level;
     }
 }
 

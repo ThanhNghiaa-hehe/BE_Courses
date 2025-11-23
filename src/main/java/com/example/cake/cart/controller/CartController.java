@@ -12,8 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("api/cart")
+/**
+ * DEPRECATED: Cart functionality replaced by direct payment
+ * This controller is disabled - use PaymentController instead
+ */
+//@RestController
+//@RequestMapping("api/cart")
 @AllArgsConstructor
 public class CartController {
 

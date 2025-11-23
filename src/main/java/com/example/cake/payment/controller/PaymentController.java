@@ -28,16 +28,16 @@ public class PaymentController {
     private final UserRepository userRepository;
 
     /**
-     * Create VNPAY payment
+     * Create VNPAY payment - Direct course purchase
      *
-     * @param request Payment request
+     * @param request Payment request with courseIds
      * @param httpRequest HTTP request to get IP
      * @param authentication User authentication
      * @return Payment URL
      */
     @PostMapping("/vnpay/create")
     public ResponseEntity<ResponseMessage<Map<String, String>>> createPayment(
-            @RequestBody Map<String, String> request,
+            @RequestBody Map<String, Object> request,
             HttpServletRequest httpRequest,
             Authentication authentication
     ) {
@@ -57,13 +57,24 @@ public class PaymentController {
         }
 
         String userId = user.getId();
-        String orderInfo = request.getOrDefault("orderInfo", "Thanh toan khoa hoc");
+
+        // Get courseIds from request
+        @SuppressWarnings("unchecked")
+        java.util.List<String> courseIds = (java.util.List<String>) request.get("courseIds");
+
+        if (courseIds == null || courseIds.isEmpty()) {
+            return ResponseEntity.ok(new ResponseMessage<>(false, "Vui lòng chọn ít nhất một khóa học", null));
+        }
+
+        String orderInfo = (String) request.getOrDefault("orderInfo", "Thanh toan khoa hoc");
         String ipAddress = getClientIp(httpRequest);
 
-        log.info("Create payment request from user: {} (email: {}), IP: {}", userId, email, ipAddress);
+        log.info("Create payment request from user: {} (email: {}), {} courses, IP: {}",
+                userId, email, courseIds.size(), ipAddress);
 
         ResponseMessage<Map<String, String>> response = paymentService.createVNPayPayment(
                 userId,
+                courseIds,
                 orderInfo,
                 ipAddress
         );
@@ -120,6 +131,48 @@ public class PaymentController {
             Authentication authentication
     ) {
         ResponseMessage<Payment> response = paymentService.getPaymentStatus(paymentId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Get all payments for current user
+     */
+    @GetMapping("/my-payments")
+    public ResponseEntity<ResponseMessage<java.util.List<Payment>>> getMyPayments(
+            Authentication authentication
+    ) {
+        String email = authentication != null ? authentication.getName() : null;
+        if (email == null) {
+            return ResponseEntity.ok(new ResponseMessage<>(false, "Vui lòng đăng nhập", null));
+        }
+
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ResponseEntity.ok(new ResponseMessage<>(false, "Không tìm thấy người dùng", null));
+        }
+
+        ResponseMessage<java.util.List<Payment>> response = paymentService.getUserPayments(user.getId());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Get successful payments for current user
+     */
+    @GetMapping("/my-payments/success")
+    public ResponseEntity<ResponseMessage<java.util.List<Payment>>> getMySuccessfulPayments(
+            Authentication authentication
+    ) {
+        String email = authentication != null ? authentication.getName() : null;
+        if (email == null) {
+            return ResponseEntity.ok(new ResponseMessage<>(false, "Vui lòng đăng nhập", null));
+        }
+
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ResponseEntity.ok(new ResponseMessage<>(false, "Không tìm thấy người dùng", null));
+        }
+
+        ResponseMessage<java.util.List<Payment>> response = paymentService.getUserSuccessfulPayments(user.getId());
         return ResponseEntity.ok(response);
     }
 

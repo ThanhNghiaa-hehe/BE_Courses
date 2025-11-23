@@ -14,8 +14,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/admin/orders")
+/**
+ * DEPRECATED: Order functionality replaced by direct payment
+ * This controller is disabled - use PaymentController instead
+ */
+//@RestController
+//@RequestMapping("/api/admin/orders")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class OrderAdminController {
