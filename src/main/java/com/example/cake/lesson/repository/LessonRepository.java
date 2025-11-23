@@ -50,18 +50,23 @@ public interface LessonRepository extends MongoRepository<Lesson, String> {
     void deleteByCourseId(String courseId);
 
     /**
-     * Tìm lesson tiếp theo trong cùng chapter (theo order)
+     * Tìm lesson cuối cùng trong chapter (order cao nhất)
      */
-    Lesson findFirstByChapterIdAndOrderGreaterThanOrderByOrderAsc(String chapterId, Integer currentOrder);
+    Lesson findFirstByChapterIdOrderByOrderDesc(String chapterId);
 
     /**
-     * Tìm TẤT CẢ lessons sau order hiện tại trong chapter (để check unlock)
-     */
-    List<Lesson> findByChapterIdAndOrderGreaterThanOrderByOrderAsc(String chapterId, Integer currentOrder);
-
-    /**
-     * Tìm lesson có order nhỏ nhất trong chapter (lesson đầu tiên)
+     * Tìm lesson đầu tiên trong chapter
      */
     Lesson findFirstByChapterIdOrderByOrderAsc(String chapterId);
+
+    /**
+     * Tìm lessons trong chapter với order lớn hơn order cho trước
+     */
+    List<Lesson> findByChapterIdAndOrderGreaterThanOrderByOrderAsc(String chapterId, Integer order);
+
+    /**
+     * Tìm lesson đầu tiên trong chapter với order lớn hơn order cho trước
+     */
+    Lesson findFirstByChapterIdAndOrderGreaterThanOrderByOrderAsc(String chapterId, Integer order);
 }
 

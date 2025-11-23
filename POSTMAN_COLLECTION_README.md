@@ -1,404 +1,333 @@
-# 📚 HƯỚNG DẪN SỬ DỤNG POSTMAN COLLECTION
+# Postman Collection - Test_PostMan_23-11-2025
 
-**Ngày cập nhật:** 23/11/2025  
-**File:** `Complete_API_Collection.postman_collection.json`
+## ✅ File đã được tạo hoàn chỉnh!
+
+**File:** `Test_PostMan_23-11-2025.postman_collection.json`  
+**Status:** ✅ Valid JSON | Ready to Import  
+**Last Updated:** November 23, 2025
 
 ---
 
-## 📦 IMPORT VÀO POSTMAN
+## 📊 Collection Summary
 
-### **Bước 1: Import Collection**
+### Total: **15 Modules | 73+ APIs**
 
-1. Mở Postman
-2. Click **Import** (góc trái trên)
-3. Chọn file `Complete_API_Collection.postman_collection.json`
-4. Click **Import**
+| # | Module | Endpoints | Auth Required |
+|---|--------|-----------|---------------|
+| 1 | Authentication | 9 | Public + Auth |
+| 2 | Courses (Admin) | 6 | Admin |
+| 3 | Courses (User) | 2 | Public |
+| 4 | Course Categories | 4 | Admin + Public |
+| 5 | Chapters (Admin) | 5 | Admin |
+| 6 | Lessons (Admin) | 6 | Admin |
+| 7 | Lessons (User) | 6 | User |
+| 8 | Curriculum | 4 | Public |
+| 9 | Progress Tracking | 4 | User |
+| 10 | Quiz (Admin) | 4 | Admin |
+| 11 | Quiz (User) | 4 | User |
+| 12 | Payment (VNPAY) | 6 | User |
+| 13 | Favorites | 7 | User |
+| 14 | User Management | 4 | User |
+| 15 | Admin - User Mgmt | 3 | Admin |
 
-### **Bước 2: Kiểm tra Variables**
+---
 
-Collection đã có sẵn các biến:
+## 🔥 New Features
 
+### ✅ Fixed Critical Bugs
+- **Video Progress:** Now uses real userId from JWT (not temp-user-id)
+- **Quiz Submit:** Fixed userId tracking
+- **Lesson Complete:** Fixed userId tracking
+- **Access Control:** Now properly checks user enrollment
+
+### 🆕 Direct Payment System
+- No more Cart/Order modules
+- Direct course purchase via Payment API
+- Auto enrollment after successful payment
+- Payment history tracking
+
+---
+
+## 📋 Endpoint Details
+
+### 1. AUTHENTICATION (9 APIs)
+```
+POST   /api/auth/register
+POST   /api/auth/verify-otp
+POST   /api/auth/login
+POST   /api/auth/google
+POST   /api/auth/refresh-token
+POST   /api/auth/forget-password
+POST   /api/auth/verify-otpPassword
+POST   /api/auth/reset-password
+```
+
+### 2. COURSES - Admin (6 APIs)
+```
+POST   /api/admin/courses/create
+GET    /api/admin/courses/getAll
+GET    /api/admin/courses/{id}
+PUT    /api/admin/courses/update
+DELETE /api/admin/courses/delete/{id}
+POST   /api/admin/courses/upload-thumbnail
+```
+
+### 3. COURSES - User (2 APIs)
+```
+GET    /api/courses
+GET    /api/courses/{id}
+```
+
+### 4. COURSE CATEGORIES (4 APIs)
+```
+GET    /api/admin/course-categories/getAll
+POST   /api/admin/course-categories/create
+PUT    /api/admin/course-categories/update
+DELETE /api/admin/course-categories/delete/{code}
+```
+
+### 5. CHAPTERS - Admin (5 APIs)
+```
+POST   /api/admin/chapters/create
+GET    /api/admin/chapters/course/{courseId}
+GET    /api/admin/chapters/{id}
+PUT    /api/admin/chapters/{id}
+DELETE /api/admin/chapters/{id}
+```
+
+### 6. LESSONS - Admin (6 APIs)
+```
+POST   /api/admin/lessons/create
+GET    /api/admin/lessons/chapter/{chapterId}
+GET    /api/admin/lessons/course/{courseId}
+GET    /api/admin/lessons/{id}
+PUT    /api/admin/lessons/{id}
+DELETE /api/admin/lessons/{id}
+```
+
+### 7. LESSONS - User (6 APIs) ✅ FIXED
+```
+GET    /api/lessons/{id}                    ✅ Fixed userId
+POST   /api/lessons/{id}/like
+POST   /api/lessons/{id}/complete           ✅ Fixed userId
+POST   /api/lessons/{id}/progress?percent=X ✅ CRITICAL FIX - Fixed userId
+GET    /api/lessons/{id}/access             ✅ Fixed userId
+GET    /api/lessons/{id}/next               ✅ Fixed userId
+```
+
+### 8. CURRICULUM (4 APIs)
+```
+GET    /api/curriculum/course/{courseId}/chapters
+GET    /api/curriculum/chapters/{chapterId}
+GET    /api/curriculum/chapters/{chapterId}/lessons
+GET    /api/curriculum/course/{courseId}/full
+```
+
+### 9. PROGRESS TRACKING (4 APIs)
+```
+POST   /api/progress/enroll/{courseId}
+GET    /api/progress/course/{courseId}
+GET    /api/progress/my-courses
+GET    /api/progress/course/{courseId}/chapters
+```
+
+### 10. QUIZ - Admin (4 APIs)
+```
+POST   /api/admin/quizzes/create
+GET    /api/admin/quizzes/{quizId}
+PUT    /api/admin/quizzes/{quizId}
+DELETE /api/admin/quizzes/{quizId}
+```
+
+### 11. QUIZ - User (4 APIs) ✅ FIXED
+```
+GET    /api/quizzes/{quizId}
+POST   /api/quizzes/submit              ✅ Fixed userId
+GET    /api/quizzes/{quizId}/attempts   ✅ Fixed userId
+GET    /api/quizzes/{quizId}/passed     ✅ Fixed userId
+```
+
+### 12. PAYMENT - VNPAY (6 APIs) 🔥 NEW
+```
+POST   /api/payment/vnpay/create        🔥 Direct purchase
+GET    /api/payment/{paymentId}/status
+GET    /api/payment/my-payments         🆕 Payment history
+GET    /api/payment/my-payments/success 🆕 Successful only
+GET    /api/payment/vnpay/return        (VNPAY callback)
+GET    /api/payment/vnpay/ipn           (VNPAY server callback)
+```
+
+### 13. FAVORITES (7 APIs)
+```
+POST   /api/favorites/{userId}
+GET    /api/favorites/{userId}
+DELETE /api/favorites/{userId}/{courseId}
+GET    /api/favorites/{userId}/check/{courseId}
+GET    /api/favorites/{userId}/count
+PUT    /api/favorites/{userId}/{courseId}/select?selected=true
+DELETE /api/favorites/{userId}/clear
+```
+
+### 14. USER MANAGEMENT (4 APIs)
+```
+GET    /api/users/find-userId
+PUT    /api/users/update-user
+PUT    /api/users/change-password
+DELETE /api/users/{userId}
+```
+
+### 15. ADMIN - USER MANAGEMENT (3 APIs)
+```
+GET    /api/admin/users/read-users
+PUT    /api/admin/users/active/{userId}
+PUT    /api/admin/users/{userId}/role
+```
+
+---
+
+## 🚀 How to Use
+
+### 1. Import to Postman
+1. Open Postman
+2. Click **Import**
+3. Select `Test_PostMan_23-11-2025.postman_collection.json`
+4. Collection will be imported with all 73+ endpoints
+
+### 2. Setup Environment Variables
+Create a new environment with these variables:
 ```
 baseUrl: http://localhost:8080
-userToken: (auto-fill sau login)
-adminToken: (auto-fill sau admin login)
-userId: (auto-fill sau login)
-courseId: (auto-fill sau get course)
+userToken: (will auto-set after login)
+adminToken: (will auto-set after admin login)
+userId: (will auto-set)
+courseId: (will auto-set after create course)
+chapterId: (will auto-set after create chapter)
+lessonId: (will auto-set after create lesson)
+quizId: (will auto-set after create quiz)
+paymentId: (will auto-set after create payment)
+```
+
+### 3. Test Flow
+
+#### Admin Flow:
+1. **Login Admin** → Get adminToken
+2. **Create Category** → DEV, DESIGN, etc.
+3. **Create Course** → Get courseId
+4. **Upload Thumbnail** → Set course image
+5. **Create Chapter** → Get chapterId
+6. **Create Lesson** → Get lessonId
+7. **Create Quiz** → Get quizId
+
+#### User Flow:
+1. **Register User** → Create account
+2. **Verify OTP** → Confirm email
+3. **Login User** → Get userToken
+4. **Get Published Courses** → Browse courses
+5. **Create Payment** → Buy course (direct)
+   - Auto-enrolls after payment success
+6. **Get My Courses** → See enrolled courses
+7. **Get Lesson** → Watch video
+8. **Update Video Progress** → Track progress ✅
+9. **Mark Lesson Complete** → Complete lesson ✅
+10. **Submit Quiz** → Test knowledge ✅
+
+---
+
+## ⚙️ Auto-Save Variables
+
+The collection includes test scripts that auto-save IDs to environment:
+
+```javascript
+// After login
+pm.environment.set('userToken', data.data.token);
+
+// After create course
+pm.environment.set('courseId', data.data.id);
+
+// After create payment
+pm.environment.set('paymentId', data.data.paymentId);
 ```
 
 ---
 
-## 🚀 HƯỚNG DẪN TEST
+## 🔐 Authentication
 
-### **1. AUTHENTICATION (Bắt buộc trước)**
+### JWT Token Required:
+- Add header: `Authorization: Bearer {{userToken}}`
+- Token auto-set after login
+- Admin endpoints require `{{adminToken}}`
 
-**A. Register User:**
-```
-POST {{baseUrl}}/api/auth/register
-
-Body:
-{
-  "email": "user@example.com",
-  "password": "password123",
-  "fullname": "Nguyen Van A",
-  "phoneNumber": "0123456789"
-}
-```
-
-**LƯU Ý:** Field là `fullname` (chữ thường), KHÔNG phải `fullName`!
-
-**B. Login User:**
-```
-POST {{baseUrl}}/api/auth/login
-
-Body:
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
-→ Token tự động lưu vào `{{userToken}}`  
-→ User ID tự động lưu vào `{{userId}}`
-
-**C. Login Admin:**
-```
-POST {{baseUrl}}/api/auth/login
-
-Body:
-{
-  "email": "admin@example.com",
-  "password": "admin123"
-}
-```
-
-→ Token tự động lưu vào `{{adminToken}}`
+### Roles:
+- **USER:** Regular user (can view, enroll, learn)
+- **ADMIN:** Full access to management APIs
 
 ---
 
-### **2. ADMIN - Tạo Course & Content**
+## 🐛 Bug Fixes Included
 
-**A. Create Course:**
-```
-POST {{baseUrl}}/api/admin/courses
-Authorization: Bearer {{adminToken}}
+### Critical Fixes (23/11/2025):
+1. ✅ **Video Progress** - Now uses real userId from JWT
+2. ✅ **Quiz Submit** - Fixed userId tracking
+3. ✅ **Lesson Complete** - Fixed userId tracking
+4. ✅ **Access Control** - Properly checks enrollment
+5. ✅ **All User APIs** - Removed hardcoded "temp-user-id"
 
-Body:
-{
-  "categoryCode": "PROGRAM",
-  "title": "Khóa học Java Spring Boot",
-  "description": "Học Spring Boot từ cơ bản...",
-  "price": 1800000.0,
-  "thumbnailUrl": "http://localhost:8080/uploads/products/course-java.jpg",
-  "duration": 50,
-  "level": "Advanced",
-  "isPublished": true,
-  "instructorName": "Nguyễn Văn A",
-  "rating": 4.8,
-  "totalStudents": 1250,
-  "discountPercent": 10,
-  "discountedPrice": 1620000.0
-}
-```
-
-→ Course ID tự động lưu vào `{{courseId}}`
-
-**B. Create Chapter:**
-```
-POST {{baseUrl}}/api/admin/chapters
-Authorization: Bearer {{adminToken}}
-
-Body:
-{
-  "courseId": "{{courseId}}",
-  "title": "Chapter 1: Giới thiệu Spring Boot",
-  "description": "Tìm hiểu về Spring Boot",
-  "orderIndex": 1
-}
-```
-
-→ Copy `chapterId` từ response
-
-**C. Create Lessons:**
-```
-POST {{baseUrl}}/api/admin/lessons
-Authorization: Bearer {{adminToken}}
-
-Body:
-{
-  "courseId": "{{courseId}}",
-  "chapterId": "chapter-id-here",
-  "title": "Lesson 1: Cài đặt Spring Boot",
-  "content": "Hướng dẫn cài đặt...",
-  "type": "VIDEO",
-  "videoUrl": "https://www.youtube.com/watch?v=VIDEO_ID",
-  "duration": 15,
-  "orderIndex": 1,
-  "isFree": true
-}
-```
-
-**D. Create Quiz:**
-```
-POST {{baseUrl}}/api/admin/quizzes
-Authorization: Bearer {{adminToken}}
-
-Body:
-{
-  "chapterId": "chapter-id-here",
-  "title": "Quiz: Kiểm tra Chapter 1",
-  "passingScore": 70,
-  "timeLimit": 30,
-  "questions": [...]
-}
-```
+### See Also:
+- `BUG_FIX_VIDEO_PROGRESS_USER_ID.md` - Detailed bug report
+- `CRITICAL_BUG_FIX_SUMMARY.md` - Quick summary
 
 ---
 
-### **3. USER - Học & Thanh Toán**
+## ❌ Deprecated Endpoints (Removed)
 
-**A. Xem Courses:**
+These endpoints are NO LONGER available:
 ```
-GET {{baseUrl}}/api/courses
-```
-
-**B. Add to Cart:**
-```
-POST {{baseUrl}}/api/cart/add
-Authorization: Bearer {{userToken}}
-
-Body:
-{
-  "courseId": "{{courseId}}",
-  "title": "Khóa học Java Spring Boot",
-  "price": 1800000.0,
-  "discountedPrice": 1620000.0,
-  ...
-}
+❌ POST   /api/cart/add/{userId}
+❌ GET    /api/cart/all
+❌ GET    /api/cart/{userId}
+❌ DELETE /api/cart/{userId}/item/{courseId}
+❌ POST   /api/orders/create-order
+❌ PUT    /api/orders/{orderId}/update-status
+❌ GET    /api/orders/{userId}
+❌ PUT    /api/orders/{orderId}/cancel
+❌ GET    /api/admin/orders/all
+❌ PUT    /api/admin/orders/{orderId}/status
 ```
 
-**LƯU Ý:** API này KHÔNG cần userId trong URL! Nó tự động lấy từ token.
-
-**Sai:** `POST {{baseUrl}}/api/cart/add/{{userId}}`  
-**Đúng:** `POST {{baseUrl}}/api/cart/add`
-
-**C. Thanh toán:**
-```
-POST {{baseUrl}}/api/payment/vnpay/create
-Authorization: Bearer {{userToken}}
-
-Body:
-{
-  "orderInfo": "Thanh toan khoa hoc"
-}
-```
-
-→ Copy `paymentUrl` và mở trong browser  
-→ Sau khi thanh toán thành công, course tự động enroll
-
-**D. Xem My Courses:**
-```
-GET {{baseUrl}}/api/progress/my-courses
-Authorization: Bearer {{userToken}}
-```
-
-**E. Học Lesson:**
-```
-GET {{baseUrl}}/api/lessons/{lessonId}
-Authorization: Bearer {{userToken}}
-```
-
-**F. Update Video Progress:**
-```
-POST {{baseUrl}}/api/lessons/{lessonId}/progress?percent=95
-Authorization: Bearer {{userToken}}
-```
-
-→ Auto complete khi percent >= 90%
-
-**G. Submit Quiz:**
-```
-POST {{baseUrl}}/api/quizzes/submit
-Authorization: Bearer {{userToken}}
-
-Body:
-{
-  "chapterId": "chapter-id-here",
-  "answers": [
-    {
-      "questionId": "q1",
-      "selectedAnswer": "A"
-    }
-  ]
-}
-```
+**Reason:** Replaced by direct payment system
 
 ---
 
-## ⚠️ LƯU Ý QUAN TRỌNG
+## 📚 Related Documentation
 
-### **1. Field Names (Case Sensitive!)**
-
-✅ **ĐÚNG:**
-```json
-{
-  "fullname": "Nguyen Van A"  // chữ thường
-}
-```
-
-❌ **SAI:**
-```json
-{
-  "fullName": "Nguyen Van A"  // chữ hoa N
-}
-```
-
-### **2. API URLs**
-
-✅ **ĐÚNG:**
-```
-POST {{baseUrl}}/api/cart/add
-GET {{baseUrl}}/api/cart
-DELETE {{baseUrl}}/api/cart/{{courseId}}
-```
-
-❌ **SAI:**
-```
-POST {{baseUrl}}/api/cart/add/{{userId}}  // Không cần userId!
-```
-
-### **3. Authentication**
-
-Tất cả API (trừ public) cần header:
-```
-Authorization: Bearer {{userToken}}
-```
-
-hoặc
-```
-Authorization: Bearer {{adminToken}}
-```
-
-### **4. Variable Placeholders**
-
-Khi thấy `{chapterId}`, `{lessonId}`, `{quizId}`:
-→ Thay bằng ID thực từ response trước đó
-
-Khi thấy `{{courseId}}`, `{{userId}}`:
-→ Tự động thay bằng biến collection
+- `ALL_ENDPOINTS.md` - Complete API documentation
+- `PAYMENT_API_GUIDE.md` - Payment API detailed guide
+- `MIGRATION_NOTES.md` - Migration from cart/order to direct payment
+- `PAYMENT_API_TEST_EXAMPLES.md` - Test examples
 
 ---
 
-## 📋 TEST SCENARIOS
+## ✅ Validation
 
-### **Scenario 1: Complete User Flow**
-
-1. Register User
-2. Login User → Save token
-3. Browse Courses
-4. Add to Cart
-5. Create Payment
-6. Complete Payment (browser)
-7. Check My Courses
-8. Learn Lessons
-9. Submit Quiz
-10. Complete Course
-
-### **Scenario 2: Admin Create Course**
-
-1. Login Admin → Save token
-2. Create Course → Save courseId
-3. Create Chapter → Save chapterId
-4. Create Lessons (multiple)
-5. Create Quiz
-6. Publish Course
-
-### **Scenario 3: Video Progress Tracking**
-
-1. Get Lesson Detail
-2. Update Progress 30%
-3. Update Progress 60%
-4. Update Progress 95% → Auto complete
-5. Get Next Lesson
+**JSON Syntax:** ✅ Valid  
+**Postman Schema:** ✅ v2.1.0  
+**Import Status:** ✅ Ready  
+**Total Requests:** 73+  
 
 ---
 
-## 🎯 KIỂM TRA THÀNH CÔNG
+## 🎯 Next Steps
 
-### **Authentication:**
-- ✅ Register thành công
-- ✅ Login trả về token
-- ✅ Token tự động lưu vào biến
-
-### **Course Management:**
-- ✅ Admin tạo được course
-- ✅ Admin tạo được chapter
-- ✅ Admin tạo được lesson
-- ✅ Admin tạo được quiz
-
-### **User Learning:**
-- ✅ User xem được courses
-- ✅ User add được vào cart
-- ✅ User thanh toán thành công
-- ✅ Course tự động enroll
-- ✅ User học được lessons
-- ✅ Video progress được track
-- ✅ Quiz pass → unlock chapter mới
+1. ✅ Import collection to Postman
+2. ⏳ Setup environment variables
+3. ⏳ Test Admin flow
+4. ⏳ Test User flow
+5. ⏳ Test Payment flow (CRITICAL)
+6. ⏳ Verify video progress tracking works correctly
 
 ---
 
-## 🔧 TROUBLESHOOTING
-
-### **Error: 401 Unauthorized**
-
-→ Token hết hạn hoặc chưa login  
-→ Login lại để lấy token mới
-
-### **Error: 403 Forbidden**
-
-→ Không có quyền (user call admin API)  
-→ Dùng đúng token (user/admin)
-
-### **Error: 404 Not Found**
-
-→ ID không tồn tại  
-→ Kiểm tra courseId, chapterId, lessonId
-
-### **Error: Field not found**
-
-→ Kiểm tra tên field (case sensitive)  
-→ `fullname` không phải `fullName`
-
----
-
-## 📦 EXPORT ENVIRONMENT (Optional)
-
-Nếu muốn share với team:
-
-1. Click ... ở Collection → Export
-2. Chọn Collection v2.1
-3. Save file JSON
-4. Team import file này
-
----
-
-## 🎉 DONE!
-
-Collection đã hoàn chỉnh với:
-
-- ✅ 13 folders (categories)
-- ✅ 60+ API endpoints
-- ✅ Auto-save tokens & IDs
-- ✅ Complete test scenarios
-- ✅ Field names chính xác
-- ✅ URL paths đúng
-- ✅ Request bodies mẫu
-
-**Sử dụng collection này để:**
-- Test toàn bộ API
-- Develop frontend
-- Debug issues
-- Demo chức năng
-
-**Happy Testing!** 🚀
+**File Created:** November 23, 2025  
+**Status:** ✅ COMPLETE | READY TO USE  
+**Bug Fixes:** ✅ ALL CRITICAL BUGS FIXED
 

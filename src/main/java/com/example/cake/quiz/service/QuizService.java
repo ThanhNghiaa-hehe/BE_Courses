@@ -24,6 +24,7 @@ public class QuizService {
 
     private final QuizRepository quizRepository;
     private final QuizAttemptRepository attemptRepository;
+    private final com.example.cake.lesson.service.ProgressService progressService;
 
     /**
      * Create quiz
@@ -148,6 +149,13 @@ public class QuizService {
         attempt = attemptRepository.save(attempt);
         log.info("Saved quiz attempt: user={}, quiz={}, score={}/{}", 
                 userId, quiz.getId(), attempt.getScore(), attempt.getTotalScore());
+
+        // ✅ FIX: Update UserProgress if quiz is passed
+        if (attempt.getPassed() && quiz.getLessonId() != null) {
+            progressService.updateQuizPassed(userId, quiz.getLessonId(), attempt.getPercentage());
+            log.info("✅ Updated quiz passed status in UserProgress for user={}, lesson={}",
+                    userId, quiz.getLessonId());
+        }
 
         // Create response
         QuizResultResponse response = QuizResultResponse.from(

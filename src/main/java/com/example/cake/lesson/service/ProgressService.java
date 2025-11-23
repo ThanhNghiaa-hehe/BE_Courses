@@ -113,6 +113,42 @@ public class ProgressService {
     }
 
     /**
+     * Lấy video progress đã lưu của một lesson
+     * FE gọi API này khi load lesson để restore progress
+     */
+    public ResponseMessage<UserProgress.LessonProgress> getLessonProgress(String userId, String lessonId) {
+        Lesson lesson = lessonRepository.findById(lessonId).orElse(null);
+        if (lesson == null) {
+            return new ResponseMessage<>(false, "Lesson not found", null);
+        }
+
+        UserProgress progress = progressRepository.findByUserIdAndCourseId(userId, lesson.getCourseId()).orElse(null);
+        if (progress == null) {
+            // User chưa enroll khóa học
+            return new ResponseMessage<>(false, "User not enrolled in this course", null);
+        }
+
+        // Tìm lesson progress
+        UserProgress.LessonProgress lessonProgress = findLessonProgressById(progress, lessonId);
+
+        if (lessonProgress == null) {
+            // Lesson chưa có progress → Tạo mới với 0%
+            lessonProgress = UserProgress.LessonProgress.builder()
+                    .lessonId(lessonId)
+                    .completed(false)
+                    .videoProgress(0)
+                    .timeSpent(0)
+                    .quizAttempts(0)
+                    .build();
+        }
+
+        log.debug("Retrieved lesson progress for user {} on lesson {}: {}%",
+                userId, lessonId, lessonProgress.getVideoProgress());
+
+        return new ResponseMessage<>(true, "Success", lessonProgress);
+    }
+
+    /**
      * Cập nhật tiến độ xem video
      */
     public ResponseMessage<UserProgress> updateVideoProgress(String userId, String lessonId, Integer percent) {
@@ -202,9 +238,24 @@ public class ProgressService {
             return new ResponseMessage<>(true, "Access granted", true);
         }
 
-        // Kiểm tra lesson trước đã hoàn thành chưa (unlock tuần tự)
-        if (!progress.isLessonCompleted(lesson.getRequiredPreviousLesson())) {
-            return new ResponseMessage<>(false, "Previous lesson not completed. Please complete the required lesson first.", false);
+        String requiredLessonId = lesson.getRequiredPreviousLesson();
+
+        // Kiểm tra lesson trước đã hoàn thành chưa
+        if (!progress.isLessonCompleted(requiredLessonId)) {
+            return new ResponseMessage<>(false, "Bạn cần hoàn thành bài học trước để mở khóa bài này", false);
+        }
+
+        // Kiểm tra videoProgress >= 90%
+        UserProgress.LessonProgress lessonProgress = findLessonProgressById(progress, requiredLessonId);
+        if (lessonProgress != null && lessonProgress.getVideoProgress() != null) {
+            if (lessonProgress.getVideoProgress() < 90) {
+                Lesson prevLesson = lessonRepository.findById(requiredLessonId).orElse(null);
+                String prevLessonTitle = prevLesson != null ? prevLesson.getTitle() : "bài trước";
+                return new ResponseMessage<>(false,
+                        String.format("Bạn cần xem ít nhất 90%% video của '%s' để mở khóa bài này (Hiện tại: %d%%)",
+                                prevLessonTitle, lessonProgress.getVideoProgress()),
+                        false);
+            }
         }
 
         return new ResponseMessage<>(true, "Access granted", true);
@@ -293,10 +344,23 @@ public class ProgressService {
             }
         }
 
-        // 3. Nếu không có lesson nào unlock trong chapter → Tìm chapter tiếp theo
+        // 3. Nếu không có lesson nào unlock trong chapter → Check quiz requirement
         Chapter currentChapter = chapterRepository.findById(currentLesson.getChapterId()).orElse(null);
         if (currentChapter == null) return null;
 
+        // ✅ FIX: Kiểm tra lesson cuối chapter có quiz và đã pass chưa
+        Lesson lastLessonInChapter = lessonRepository.findFirstByChapterIdOrderByOrderDesc(currentChapter.getId());
+        if (lastLessonInChapter != null && Boolean.TRUE.equals(lastLessonInChapter.getHasQuiz())) {
+            UserProgress.LessonProgress lastLessonProgress = findLessonProgressById(progress, lastLessonInChapter.getId());
+            if (lastLessonProgress == null || lastLessonProgress.getQuizPassedAt() == null) {
+                // Quiz chưa pass → Không unlock chapter tiếp theo
+                log.debug("Cannot unlock next chapter: quiz of last lesson {} not passed yet",
+                        lastLessonInChapter.getId());
+                return null;
+            }
+        }
+
+        // 4. Tìm chapter tiếp theo
         Chapter nextChapter = chapterRepository.findFirstByCourseIdAndOrderGreaterThanOrderByOrderAsc(
                 currentChapter.getCourseId(),
                 currentChapter.getOrder()
@@ -304,7 +368,7 @@ public class ProgressService {
 
         if (nextChapter == null) return null;
 
-        // 4. Tìm lesson đầu tiên unlock trong chapter mới
+        // 5. Tìm lesson đầu tiên unlock trong chapter mới
         List<Lesson> candidatesInNextChapter = lessonRepository.findAllByChapterIdOrderByOrderAsc(nextChapter.getId());
         for (Lesson lesson : candidatesInNextChapter) {
             if (isLessonUnlocked(lesson, progress)) {
@@ -319,7 +383,9 @@ public class ProgressService {
      * Kiểm tra lesson có unlock không (cho user ĐÃ ENROLL)
      *
      * Lưu ý: User đã mua khóa học rồi, nên KHÔNG check isFree
-     * Chỉ check unlock tuần tự theo requiredPreviousLesson
+     * Check:
+     * 1. Lesson trước đã completed
+     * 2. VideoProgress của lesson trước >= 90%
      */
     private boolean isLessonUnlocked(Lesson lesson, UserProgress progress) {
         // Nếu không có yêu cầu lesson trước → unlock (lesson đầu tiên của chapter/course)
@@ -327,8 +393,37 @@ public class ProgressService {
             return true;
         }
 
-        // Kiểm tra lesson trước đã complete chưa (unlock tuần tự)
-        return progress.isLessonCompleted(lesson.getRequiredPreviousLesson());
+        String requiredLessonId = lesson.getRequiredPreviousLesson();
+
+        // 1. Kiểm tra lesson trước đã complete chưa
+        if (!progress.isLessonCompleted(requiredLessonId)) {
+            return false;
+        }
+
+        // 2. Kiểm tra videoProgress >= 90%
+        UserProgress.LessonProgress lessonProgress = findLessonProgressById(progress, requiredLessonId);
+        if (lessonProgress != null && lessonProgress.getVideoProgress() != null) {
+            if (lessonProgress.getVideoProgress() < 90) {
+                log.debug("Lesson {} locked: previous lesson {} video progress {}% < 90%",
+                        lesson.getId(), requiredLessonId, lessonProgress.getVideoProgress());
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Helper method để tìm LessonProgress by lessonId
+     */
+    private UserProgress.LessonProgress findLessonProgressById(UserProgress progress, String lessonId) {
+        if (progress.getLessonsProgress() == null) {
+            return null;
+        }
+        return progress.getLessonsProgress().stream()
+                .filter(lp -> lp.getLessonId().equals(lessonId))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -378,23 +473,58 @@ public class ProgressService {
 
                     if (!quizPassed) {
                         // Quiz chưa pass
-                        message = "❌ Bạn cần đạt điểm tối thiểu để unlock lesson tiếp theo. Hãy làm lại quiz!";
+                        message = "❌ Bạn cần hoàn thành quiz với điểm tối thiểu để mở khóa bài tiếp theo hoặc chương mới. Hãy làm lại quiz!";
                         suggestedAction = "RETAKE_QUIZ";
                         requiredLessonId = currentLesson.getId();
                     } else {
-                        // Quiz đã pass nhưng vẫn chưa có lesson unlock (có thể hết khóa học hoặc cần complete lesson khác)
-                        message = "✅ Quiz hoàn thành! Hãy hoàn thành các bài yêu cầu khác để tiếp tục.";
-                        suggestedAction = "COMPLETE_REQUIRED";
+                        // Quiz đã pass nhưng vẫn chưa có lesson unlock
+                        // Có thể là do lesson tiếp theo yêu cầu lesson khác hoặc hết khóa học
+                        Lesson nextLockedLesson = findNextLessonIgnoreLock(currentLesson);
+                        if (nextLockedLesson != null && nextLockedLesson.getRequiredPreviousLesson() != null) {
+                            Lesson requiredLesson = lessonRepository.findById(nextLockedLesson.getRequiredPreviousLesson()).orElse(null);
+                            if (requiredLesson != null) {
+                                UserProgress.LessonProgress reqProgress = findLessonProgressById(progress, requiredLesson.getId());
+                                if (reqProgress == null || reqProgress.getVideoProgress() == null || reqProgress.getVideoProgress() < 90) {
+                                    message = String.format("⚠️ Bạn cần xem ít nhất 90%% video của '%s' để mở khóa bài tiếp theo.",
+                                            requiredLesson.getTitle());
+                                } else {
+                                    message = String.format("⚠️ Bạn cần hoàn thành bài '%s' để mở khóa bài tiếp theo.",
+                                            requiredLesson.getTitle());
+                                }
+                                suggestedAction = "COMPLETE_REQUIRED";
+                                requiredLessonId = requiredLesson.getId();
+                            } else {
+                                message = "✅ Quiz hoàn thành! Hãy hoàn thành các bài yêu cầu khác để tiếp tục.";
+                                suggestedAction = "COMPLETE_REQUIRED";
+                            }
+                        } else {
+                            message = "✅ Quiz hoàn thành! Chương này đã hoàn thành.";
+                        }
                     }
                 } else {
                     // Lesson bình thường, có lesson tiếp nhưng bị lock
                     Lesson nextLockedLesson = findNextLessonIgnoreLock(currentLesson);
                     if (nextLockedLesson != null && nextLockedLesson.getRequiredPreviousLesson() != null) {
-                        message = "⚠️ Hãy hoàn thành bài yêu cầu để unlock lesson tiếp theo.";
-                        suggestedAction = "COMPLETE_REQUIRED";
-                        requiredLessonId = nextLockedLesson.getRequiredPreviousLesson();
+                        Lesson requiredLesson = lessonRepository.findById(nextLockedLesson.getRequiredPreviousLesson()).orElse(null);
+                        if (requiredLesson != null) {
+                            UserProgress.LessonProgress reqProgress = findLessonProgressById(progress, requiredLesson.getId());
+                            if (reqProgress == null || reqProgress.getVideoProgress() == null || reqProgress.getVideoProgress() < 90) {
+                                int currentProgress = (reqProgress != null && reqProgress.getVideoProgress() != null)
+                                        ? reqProgress.getVideoProgress() : 0;
+                                message = String.format("⚠️ Bạn cần xem ít nhất 90%% video của '%s' để mở khóa bài tiếp theo (Hiện tại: %d%%).",
+                                        requiredLesson.getTitle(), currentProgress);
+                            } else {
+                                message = String.format("⚠️ Bạn cần hoàn thành bài '%s' để mở khóa bài tiếp theo.",
+                                        requiredLesson.getTitle());
+                            }
+                            suggestedAction = "COMPLETE_REQUIRED";
+                            requiredLessonId = requiredLesson.getId();
+                        } else {
+                            message = "⚠️ Hãy hoàn thành bài yêu cầu để mở khóa bài tiếp theo.";
+                            suggestedAction = "COMPLETE_REQUIRED";
+                        }
                     } else {
-                        message = "✅ Lesson hoàn thành!";
+                        message = "✅ Bài học hoàn thành!";
                     }
                 }
             }
@@ -443,6 +573,34 @@ public class ProgressService {
     }
 
     // ========== MY COURSES APIS ==========
+
+    /**
+     * Cập nhật quiz passed status (called by QuizService)
+     */
+    public ResponseMessage<UserProgress> updateQuizPassed(String userId, String lessonId, Double score) {
+        Lesson lesson = lessonRepository.findById(lessonId).orElse(null);
+        if (lesson == null) {
+            return new ResponseMessage<>(false, "Lesson not found", null);
+        }
+
+        UserProgress progress = progressRepository.findByUserIdAndCourseId(userId, lesson.getCourseId()).orElse(null);
+        if (progress == null) {
+            return new ResponseMessage<>(false, "Progress not found", null);
+        }
+
+        UserProgress.LessonProgress lessonProgress = findOrCreateLessonProgress(progress, lessonId);
+        lessonProgress.setQuizScore(score.intValue());
+        lessonProgress.setQuizPassedAt(LocalDateTime.now());
+
+        // Increment quiz attempts
+        Integer attempts = lessonProgress.getQuizAttempts();
+        lessonProgress.setQuizAttempts(attempts != null ? attempts + 1 : 1);
+
+        progressRepository.save(progress);
+        log.info("Updated quiz passed status for user {} on lesson {}, score: {}", userId, lessonId, score);
+
+        return new ResponseMessage<>(true, "Quiz passed status updated", progress);
+    }
 
     /**
      * Lấy danh sách khóa học user đã đăng ký (My Courses)

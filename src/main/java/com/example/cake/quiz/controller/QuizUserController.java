@@ -1,5 +1,7 @@
 package com.example.cake.quiz.controller;
 
+import com.example.cake.auth.model.User;
+import com.example.cake.auth.repository.UserRepository;
 import com.example.cake.quiz.dto.QuizResultResponse;
 import com.example.cake.quiz.dto.QuizSubmitRequest;
 import com.example.cake.quiz.model.Quiz;
@@ -22,6 +24,17 @@ import java.util.List;
 public class QuizUserController {
 
     private final QuizService quizService;
+    private final UserRepository userRepository;
+
+    /**
+     * Helper method to get userId from Authentication
+     */
+    private String getUserId(Authentication authentication) {
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getId();
+    }
 
     /**
      * Get quiz for student (without correct answers)
@@ -42,7 +55,7 @@ public class QuizUserController {
             @RequestBody QuizSubmitRequest request,
             Authentication authentication
     ) {
-        String userId = "temp-user-id"; // TODO: Get from authentication
+        String userId = getUserId(authentication);
         return ResponseEntity.ok(quizService.submitQuiz(userId, request));
     }
 
@@ -54,7 +67,7 @@ public class QuizUserController {
             @PathVariable String quizId,
             Authentication authentication
     ) {
-        String userId = "temp-user-id";
+        String userId = getUserId(authentication);
         return ResponseEntity.ok(quizService.getAttempts(userId, quizId));
     }
 
@@ -66,7 +79,7 @@ public class QuizUserController {
             @PathVariable String quizId,
             Authentication authentication
     ) {
-        String userId = "temp-user-id";
+        String userId = getUserId(authentication);
         return ResponseEntity.ok(quizService.hasPassedQuiz(userId, quizId));
     }
 }

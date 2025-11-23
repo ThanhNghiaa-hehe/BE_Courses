@@ -47,6 +47,11 @@ public class LessonCompleteResponse {
         private Boolean hasQuiz;
         private Boolean isUnlocked;         // Đã unlock chưa (previous lesson complete)
 
+        // Video info
+        private String videoUrl;            // URL video để FE có thể play ngay
+        private String videoId;             // ID video (extract từ URL)
+        private String videoThumbnail;      // Thumbnail video
+
         public static NextLesson fromLesson(Lesson lesson, String chapterTitle, Boolean isUnlocked) {
             if (lesson == null) return null;
 
@@ -61,6 +66,9 @@ public class LessonCompleteResponse {
                     .isFree(lesson.getIsFree())
                     .hasQuiz(lesson.getHasQuiz())
                     .isUnlocked(isUnlocked)
+                    .videoUrl(lesson.getVideoUrl())           // ✅ Thêm videoUrl
+                    .videoId(lesson.getVideoId())             // ✅ Thêm videoId
+                    .videoThumbnail(lesson.getVideoThumbnail()) // ✅ Thêm thumbnail
                     .build();
         }
     }

@@ -1,5 +1,7 @@
 package com.example.cake.lesson.controller;
 
+import com.example.cake.auth.model.User;
+import com.example.cake.auth.repository.UserRepository;
 import com.example.cake.lesson.dto.LessonCompleteResponse;
 import com.example.cake.lesson.dto.QuizResult;
 import com.example.cake.lesson.dto.QuizSubmission;
@@ -23,6 +25,17 @@ public class LessonUserController {
 
     private final LessonService lessonService;
     private final ProgressService progressService;
+    private final UserRepository userRepository;
+
+    /**
+     * Helper method to get userId from Authentication
+     */
+    private String getUserId(Authentication authentication) {
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getId();
+    }
 
     /**
      * Lấy thông tin lesson (có kiểm tra quyền truy cập)
@@ -32,13 +45,13 @@ public class LessonUserController {
             @PathVariable String id,
             Authentication authentication
     ) {
+        String userId = getUserId(authentication);
+
         // Kiểm tra quyền truy cập
-        String userEmail = authentication.getName();
-        // TODO: Get userId from email
-        // ResponseMessage<Boolean> access = progressService.canAccessLesson(userId, id);
-        // if (!Boolean.TRUE.equals(access.getData())) {
-        //     return ResponseEntity.status(403).body(new ResponseMessage<>(false, access.getMessage(), null));
-        // }
+        ResponseMessage<Boolean> access = progressService.canAccessLesson(userId, id);
+        if (!Boolean.TRUE.equals(access.getData())) {
+            return ResponseEntity.status(403).body(new ResponseMessage<>(false, access.getMessage(), null));
+        }
 
         return ResponseEntity.ok(lessonService.getLessonById(id));
     }
@@ -59,11 +72,20 @@ public class LessonUserController {
             @PathVariable String id,
             Authentication authentication
     ) {
-        String userEmail = authentication.getName();
-        // TODO: Get userId from email
-        String userId = "temp-user-id"; // Temporary, cần implement getUserIdFromEmail
-
+        String userId = getUserId(authentication);
         return ResponseEntity.ok(progressService.markLessonComplete(userId, id));
+    }
+
+    /**
+     * Lấy video progress đã lưu (để FE restore khi reload page)
+     */
+    @GetMapping("/{id}/progress")
+    public ResponseEntity<ResponseMessage<UserProgress.LessonProgress>> getVideoProgress(
+            @PathVariable String id,
+            Authentication authentication
+    ) {
+        String userId = getUserId(authentication);
+        return ResponseEntity.ok(progressService.getLessonProgress(userId, id));
     }
 
     /**
@@ -75,9 +97,7 @@ public class LessonUserController {
             @RequestParam Integer percent,
             Authentication authentication
     ) {
-        String userEmail = authentication.getName();
-        String userId = "temp-user-id";
-
+        String userId = getUserId(authentication);
         return ResponseEntity.ok(progressService.updateVideoProgress(userId, id, percent));
     }
 
@@ -108,9 +128,7 @@ public class LessonUserController {
             @PathVariable String id,
             Authentication authentication
     ) {
-        String userEmail = authentication.getName();
-        String userId = "temp-user-id";
-
+        String userId = getUserId(authentication);
         return ResponseEntity.ok(progressService.canAccessLesson(userId, id));
     }
 
@@ -122,9 +140,7 @@ public class LessonUserController {
             @PathVariable String id,
             Authentication authentication
     ) {
-        String userEmail = authentication.getName();
-        String userId = "temp-user-id";
-
+        String userId = getUserId(authentication);
         ResponseMessage<LessonCompleteResponse> response = progressService.getNextLessonInfo(userId, id);
         return ResponseEntity.ok(response);
     }

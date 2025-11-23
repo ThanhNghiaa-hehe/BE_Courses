@@ -1,34 +1,38 @@
-# E-Learning Platform - Complete API Endpoints
+# Complete API Endpoints - E-Learning Platform
 
-**Updated:** November 23, 2025  
-**Version:** 2.0 - Direct Payment System (Cart & Order removed)
-
----
-
-## 📋 Table of Contents
-1. [Authentication](#1-authentication)
-2. [Courses (Admin)](#2-courses-admin)
-3. [Courses (User)](#3-courses-user)
-4. [Course Categories](#4-course-categories)
-5. [Chapters (Admin)](#5-chapters-admin)
-6. [Lessons (Admin)](#6-lessons-admin)
-7. [Lessons (User)](#7-lessons-user)
-8. [Curriculum](#8-curriculum)
-9. [Progress Tracking](#9-progress-tracking)
-10. [Quiz (Admin)](#10-quiz-admin)
-11. [Quiz (User)](#11-quiz-user)
-12. [Payment (VNPAY)](#12-payment-vnpay)
-13. [Favorites](#13-favorites)
-14. [User Management](#14-user-management)
-15. [Admin - User Management](#15-admin-user-management)
-
-**Total:** 15 Active Modules | **100+ APIs**
+**Last Updated:** November 23, 2025  
+**Version:** 2.0  
+**Status:** ✅ All Active Endpoints (Cart & Order Removed)
 
 ---
 
-## 1. AUTHENTICATION
+## 📊 Summary
 
-Base Path: `/api/auth`
+| Module | Endpoints | Auth Required |
+|--------|-----------|---------------|
+| Authentication | 9 | Mixed |
+| Courses (Admin) | 6 | Admin |
+| Courses (User) | 2 | Public |
+| Course Categories | 4 | Admin/Public |
+| Chapters (Admin) | 5 | Admin |
+| Lessons (Admin) | 6 | Admin |
+| Lessons (User) | 8 | User |
+| Curriculum (Public) | 4 | Public |
+| Progress Tracking | 4 | User |
+| Quiz (Admin) | 4 | Admin |
+| Quiz (User) | 4 | User |
+| Payment (VNPAY) | 6 | User/Public |
+| Favorites | 7 | User |
+| User Management | 4 | User |
+| Admin User Management | 3 | Admin |
+
+**Total Active Endpoints:** 76 APIs
+
+---
+
+## 1️⃣ AUTHENTICATION
+
+Base: `/api/auth`
 
 ### 1.1. Register User
 ```http
@@ -111,7 +115,7 @@ Content-Type: application/json
 
 Body:
 {
-  "idToken": "google_id_token"
+  "idToken": "google_id_token_from_frontend"
 }
 
 Response:
@@ -205,10 +209,10 @@ Response:
 
 ---
 
-## 2. COURSES (Admin)
+## 2️⃣ COURSES (Admin)
 
-Base Path: `/api/admin/courses`  
-**Authentication:** Required (Admin role)
+Base: `/api/admin/courses`  
+**Auth:** Admin role required
 
 ### 2.1. Create Course
 ```http
@@ -255,15 +259,7 @@ Response:
 {
   "success": true,
   "message": "Lấy danh sách khóa học thành công",
-  "data": [
-    {
-      "id": "course_id",
-      "title": "React Hooks Cơ Bản",
-      "isPublished": true,
-      ...
-    },
-    ...
-  ]
+  "data": [...]
 }
 ```
 
@@ -276,12 +272,7 @@ Response:
 {
   "success": true,
   "message": "Lấy khóa học thành công",
-  "data": {
-    "id": "course_id",
-    "title": "React Hooks Cơ Bản",
-    "description": "...",
-    ...
-  }
+  "data": {...}
 }
 ```
 
@@ -295,17 +286,14 @@ Body:
 {
   "id": "course_id",
   "title": "React Hooks Nâng Cao",
-  "description": "Updated description",
-  "price": 800000,
-  "discountPercent": 20,
-  "discountedPrice": 640000
+  "price": 800000
 }
 
 Response:
 {
   "success": true,
   "message": "Cập nhật khóa học thành công",
-  "data": { ... }
+  "data": {...}
 }
 ```
 
@@ -329,7 +317,7 @@ Authorization: Bearer {admin_token}
 Content-Type: multipart/form-data
 
 Body:
-file: [binary file]
+file: [binary]
 
 Response:
 {
@@ -340,10 +328,10 @@ Response:
 
 ---
 
-## 3. COURSES (User)
+## 3️⃣ COURSES (User)
 
-Base Path: `/api/courses`  
-**Authentication:** Optional (some endpoints require login)
+Base: `/api/courses`  
+**Auth:** Public
 
 ### 3.1. Get All Published Courses
 ```http
@@ -353,18 +341,7 @@ Response:
 {
   "success": true,
   "message": "Lấy danh sách khóa học thành công",
-  "data": [
-    {
-      "id": "course_id",
-      "title": "React Hooks Cơ Bản",
-      "price": 600000,
-      "discountedPrice": 500000,
-      "level": "BEGINNER",
-      "isPublished": true,
-      ...
-    },
-    ...
-  ]
+  "data": [...]
 }
 ```
 
@@ -382,9 +359,6 @@ Response:
     "description": "...",
     "price": 600000,
     "discountedPrice": 500000,
-    "instructorName": "Nguyễn Văn A",
-    "rating": 4.5,
-    "totalStudents": 1234,
     ...
   }
 }
@@ -392,10 +366,10 @@ Response:
 
 ---
 
-## 4. COURSE CATEGORIES
+## 4️⃣ COURSE CATEGORIES
 
-Base Path: `/api/admin/course-categories`  
-**Authentication:** Admin for CUD, Public for Read
+Base: `/api/admin/course-categories`  
+**Auth:** Admin for CUD, Public for Read
 
 ### 4.1. Get All Categories
 ```http
@@ -410,13 +384,7 @@ Response:
       "code": "DEV",
       "name": "Lập trình",
       "description": "Các khóa học về lập trình"
-    },
-    {
-      "code": "DESIGN",
-      "name": "Thiết kế",
-      "description": "Các khóa học về thiết kế"
-    },
-    ...
+    }
   ]
 }
 ```
@@ -438,11 +406,7 @@ Response:
 {
   "success": true,
   "message": "Tạo danh mục thành công",
-  "data": {
-    "code": "DEV",
-    "name": "Lập trình",
-    "description": "Các khóa học về lập trình"
-  }
+  "data": {...}
 }
 ```
 
@@ -463,7 +427,7 @@ Response:
 {
   "success": true,
   "message": "Cập nhật danh mục thành công",
-  "data": { ... }
+  "data": {...}
 }
 ```
 
@@ -482,10 +446,10 @@ Response:
 
 ---
 
-## 5. CHAPTERS (Admin)
+## 5️⃣ CHAPTERS (Admin)
 
-Base Path: `/api/admin/chapters`  
-**Authentication:** Required (Admin role)
+Base: `/api/admin/chapters`  
+**Auth:** Admin role required
 
 ### 5.1. Create Chapter
 ```http
@@ -505,13 +469,7 @@ Response:
 {
   "success": true,
   "message": "Tạo chapter thành công",
-  "data": {
-    "id": "chapter_id",
-    "courseId": "course_id",
-    "title": "Giới thiệu về React Hooks",
-    "order": 1,
-    ...
-  }
+  "data": {...}
 }
 ```
 
@@ -524,14 +482,7 @@ Response:
 {
   "success": true,
   "message": "Lấy chapters thành công",
-  "data": [
-    {
-      "id": "chapter_id",
-      "title": "Giới thiệu về React Hooks",
-      "order": 1
-    },
-    ...
-  ]
+  "data": [...]
 }
 ```
 
@@ -544,12 +495,7 @@ Response:
 {
   "success": true,
   "message": "Lấy chapter thành công",
-  "data": {
-    "id": "chapter_id",
-    "courseId": "course_id",
-    "title": "Giới thiệu về React Hooks",
-    ...
-  }
+  "data": {...}
 }
 ```
 
@@ -570,7 +516,7 @@ Response:
 {
   "success": true,
   "message": "Cập nhật chapter thành công",
-  "data": { ... }
+  "data": {...}
 }
 ```
 
@@ -589,10 +535,10 @@ Response:
 
 ---
 
-## 6. LESSONS (Admin)
+## 6️⃣ LESSONS (Admin)
 
-Base Path: `/api/admin/lessons`  
-**Authentication:** Required (Admin role)
+Base: `/api/admin/lessons`  
+**Auth:** Admin role required
 
 ### 6.1. Create Lesson
 ```http
@@ -616,12 +562,7 @@ Response:
 {
   "success": true,
   "message": "Tạo lesson thành công",
-  "data": {
-    "id": "lesson_id",
-    "title": "useState Hook",
-    "duration": 15,
-    ...
-  }
+  "data": {...}
 }
 ```
 
@@ -634,15 +575,7 @@ Response:
 {
   "success": true,
   "message": "Lấy lessons thành công",
-  "data": [
-    {
-      "id": "lesson_id",
-      "title": "useState Hook",
-      "duration": 15,
-      "order": 1
-    },
-    ...
-  ]
+  "data": [...]
 }
 ```
 
@@ -655,7 +588,7 @@ Response:
 {
   "success": true,
   "message": "Lấy lessons thành công",
-  "data": [ ... ]
+  "data": [...]
 }
 ```
 
@@ -668,12 +601,7 @@ Response:
 {
   "success": true,
   "message": "Lấy lesson thành công",
-  "data": {
-    "id": "lesson_id",
-    "title": "useState Hook",
-    "videoUrl": "https://youtube.com/watch?v=xxx",
-    ...
-  }
+  "data": {...}
 }
 ```
 
@@ -687,7 +615,6 @@ Body:
 {
   "title": "useState Hook - Chi tiết",
   "description": "Updated description",
-  "videoUrl": "https://youtube.com/watch?v=yyy",
   "duration": 20
 }
 
@@ -695,7 +622,7 @@ Response:
 {
   "success": true,
   "message": "Cập nhật lesson thành công",
-  "data": { ... }
+  "data": {...}
 }
 ```
 
@@ -714,10 +641,10 @@ Response:
 
 ---
 
-## 7. LESSONS (User)
+## 7️⃣ LESSONS (User)
 
-Base Path: `/api/lessons`  
-**Authentication:** Required (User must be enrolled)
+Base: `/api/lessons`  
+**Auth:** User required
 
 ### 7.1. Get Lesson Detail
 ```http
@@ -767,13 +694,13 @@ Response:
   "data": {
     "userId": "user_id",
     "courseId": "course_id",
-    "completedLessons": ["lesson_id_1", "lesson_id_2"],
+    "completedLessons": ["lesson_id"],
     "totalProgress": 45
   }
 }
 ```
 
-### 7.4. Get Video Progress (NEW)
+### 7.4. Get Video Progress 🆕
 ```http
 GET /api/lessons/{id}/progress
 Authorization: Bearer {user_token}
@@ -793,7 +720,7 @@ Response:
   }
 }
 ```
-**Use case:** FE gọi API này khi load lesson để restore progress từ database (không bị mất khi reload page)
+**Use Case:** FE gọi API này khi load lesson để restore progress đã lưu trong database
 
 ### 7.5. Update Video Progress
 ```http
@@ -817,21 +744,29 @@ Response:
   }
 }
 ```
+**Note:** Khi videoProgress >= 90% → Tự động complete lesson
 
-### 7.7. Check Lesson Access
+### 7.6. Check Lesson Access
 ```http
 GET /api/lessons/{id}/access
 Authorization: Bearer {user_token}
 
-Response:
+Response (có quyền):
 {
   "success": true,
-  "message": "User có quyền truy cập",
+  "message": "Access granted",
   "data": true
+}
+
+Response (chưa đủ điều kiện):
+{
+  "success": false,
+  "message": "Bạn cần xem ít nhất 90% video của 'useState Hook' để mở khóa bài này (Hiện tại: 45%)",
+  "data": false
 }
 ```
 
-### 7.8. Get Next Lesson Info
+### 7.7. Get Next Lesson Info
 ```http
 GET /api/lessons/{id}/next
 Authorization: Bearer {user_token}
@@ -839,27 +774,44 @@ Authorization: Bearer {user_token}
 Response:
 {
   "success": true,
-  "message": "Lấy thông tin lesson tiếp theo",
+  "message": "Next lesson info retrieved",
   "data": {
-    "currentLesson": { ... },
+    "completed": true,
+    "totalProgress": 50,
+    "completedLessons": 5,
+    "totalLessons": 10,
     "nextLesson": {
       "id": "next_lesson_id",
       "title": "useEffect Hook",
-      ...
+      "description": "Học cách sử dụng useEffect hook",
+      "duration": 20,
+      "chapterId": "chapter_id",
+      "chapterTitle": "React Hooks Advanced",
+      "order": 2,
+      "isFree": false,
+      "hasQuiz": true,
+      "unlocked": true,
+      "videoUrl": "https://youtube.com/watch?v=xxx",
+      "videoId": "xxx",
+      "videoThumbnail": "https://img.youtube.com/vi/xxx/maxresdefault.jpg"
     },
-    "isLastLesson": false
+    "message": "✅ Lesson hoàn thành! Chuyển sang bài tiếp theo.",
+    "courseCompleted": false,
+    "suggestedAction": null,
+    "requiredLessonId": null
   }
 }
 ```
+**Note:** Response bao gồm đầy đủ `videoUrl` để FE có thể chuyển video ngay mà không cần gọi thêm API
 
 ---
 
-## 8. CURRICULUM
+## 8️⃣ CURRICULUM (Public)
 
-Base Path: `/api/curriculum`  
-**Authentication:** Public (no auth required)
+Base: `/api/curriculum`  
+**Auth:** Public (no authentication required)
 
-### 8.1. Get Course Chapters (Public)
+### 8.1. Get Course Chapters
 ```http
 GET /api/curriculum/course/{courseId}/chapters
 
@@ -872,8 +824,7 @@ Response:
       "id": "chapter_id",
       "title": "Giới thiệu về React Hooks",
       "order": 1
-    },
-    ...
+    }
   ]
 }
 ```
@@ -886,15 +837,11 @@ Response:
 {
   "success": true,
   "message": "Lấy chapter thành công",
-  "data": {
-    "id": "chapter_id",
-    "title": "Giới thiệu về React Hooks",
-    ...
-  }
+  "data": {...}
 }
 ```
 
-### 8.3. Get Chapter Lessons (Public)
+### 8.3. Get Chapter Lessons
 ```http
 GET /api/curriculum/chapters/{chapterId}/lessons
 
@@ -909,8 +856,7 @@ Response:
       "duration": 15,
       "isFree": false,
       "order": 1
-    },
-    ...
+    }
   ]
 }
 ```
@@ -923,25 +869,16 @@ Response:
 {
   "success": true,
   "message": "Lấy curriculum thành công",
-  "data": [
-    {
-      "id": "lesson_id",
-      "chapterId": "chapter_id",
-      "title": "useState Hook",
-      "duration": 15,
-      ...
-    },
-    ...
-  ]
+  "data": [...]
 }
 ```
 
 ---
 
-## 9. PROGRESS TRACKING
+## 9️⃣ PROGRESS TRACKING
 
-Base Path: `/api/progress`  
-**Authentication:** Required
+Base: `/api/progress`  
+**Auth:** User required
 
 ### 9.1. Enroll Course
 ```http
@@ -974,7 +911,7 @@ Response:
   "data": {
     "userId": "user_id",
     "courseId": "course_id",
-    "completedLessons": ["lesson_id_1", "lesson_id_2"],
+    "completedLessons": ["lesson_id_1"],
     "totalProgress": 45,
     "lastAccessedAt": "2025-11-23T15:30:00"
   }
@@ -998,8 +935,7 @@ Response:
       "progress": 45,
       "enrolledAt": "2025-11-23T10:00:00",
       "lastAccessedAt": "2025-11-23T15:30:00"
-    },
-    ...
+    }
   ]
 }
 ```
@@ -1023,22 +959,20 @@ Response:
           "lessonTitle": "useState Hook",
           "isCompleted": true,
           "watchedPercent": 100
-        },
-        ...
+        }
       ],
       "chapterProgress": 75
-    },
-    ...
+    }
   ]
 }
 ```
 
 ---
 
-## 10. QUIZ (Admin)
+## 🔟 QUIZ (Admin)
 
-Base Path: `/api/admin/quizzes`  
-**Authentication:** Required (Admin role)
+Base: `/api/admin/quizzes`  
+**Auth:** Admin role required
 
 ### 10.1. Create Quiz
 ```http
@@ -1076,12 +1010,7 @@ Response:
 {
   "success": true,
   "message": "Tạo quiz thành công",
-  "data": {
-    "id": "quiz_id",
-    "lessonId": "lesson_id",
-    "title": "Kiểm tra useState Hook",
-    ...
-  }
+  "data": {...}
 }
 ```
 
@@ -1097,17 +1026,7 @@ Response:
   "data": {
     "id": "quiz_id",
     "title": "Kiểm tra useState Hook",
-    "questions": [
-      {
-        "questionText": "...",
-        "options": [
-          {
-            "text": "Quản lý state",
-            "isCorrect": true
-          }
-        ]
-      }
-    ]
+    "questions": [...] // With correct answers
   }
 }
 ```
@@ -1121,7 +1040,6 @@ Content-Type: application/json
 Body:
 {
   "title": "Kiểm tra useState Hook - Updated",
-  "description": "Updated description",
   "passingScore": 80
 }
 
@@ -1129,7 +1047,7 @@ Response:
 {
   "success": true,
   "message": "Cập nhật quiz thành công",
-  "data": { ... }
+  "data": {...}
 }
 ```
 
@@ -1148,10 +1066,10 @@ Response:
 
 ---
 
-## 11. QUIZ (User)
+## 1️⃣1️⃣ QUIZ (User)
 
-Base Path: `/api/quizzes`  
-**Authentication:** Required
+Base: `/api/quizzes`  
+**Auth:** User required
 
 ### 11.1. Get Quiz (Without Answers)
 ```http
@@ -1175,9 +1093,7 @@ Response:
         "options": [
           {
             "text": "Quản lý state"
-          },
-          {
-            "text": "Gọi API"
+            // isCorrect hidden
           }
         ],
         "points": 10
@@ -1238,8 +1154,7 @@ Response:
       "score": 80,
       "passed": true,
       "submittedAt": "2025-11-23T16:00:00"
-    },
-    ...
+    }
   ]
 }
 ```
@@ -1259,14 +1174,12 @@ Response:
 
 ---
 
-## 12. PAYMENT (VNPAY)
+## 1️⃣2️⃣ PAYMENT (VNPAY)
 
-Base Path: `/api/payment`  
-**Authentication:** Required
+Base: `/api/payment`  
+**Auth:** User required for create, Public for callbacks
 
-🔥 **NEW:** Direct course purchase without cart/order
-
-### 12.1. Create Payment (Buy Courses)
+### 12.1. Create Payment (Buy Courses) 🔥
 ```http
 POST /api/payment/vnpay/create
 Authorization: Bearer {user_token}
@@ -1288,10 +1201,11 @@ Response:
   }
 }
 ```
+**Flow:** User click → Redirect to VNPAY → Pay → Return to app → Auto enroll courses
 
 ### 12.2. VNPAY Return URL
 ```http
-GET /api/payment/vnpay/return?vnp_Amount=50000000&vnp_BankCode=NCB&vnp_ResponseCode=00&vnp_TxnRef=payment_id&...
+GET /api/payment/vnpay/return?vnp_Amount=50000000&vnp_ResponseCode=00&vnp_TxnRef=payment_id&...
 
 Response:
 {
@@ -1330,15 +1244,7 @@ Response:
   "data": {
     "id": "payment_id",
     "userId": "user_id",
-    "courses": [
-      {
-        "courseId": "course_id",
-        "title": "React Hooks Cơ Bản",
-        "price": 600000,
-        "discountedPrice": 500000,
-        ...
-      }
-    ],
+    "courses": [...],
     "amount": 500000,
     "status": "SUCCESS",
     "paymentMethod": "VNPAY",
@@ -1360,13 +1266,11 @@ Response:
   "data": [
     {
       "id": "payment_id",
-      "courses": [ ... ],
+      "courses": [...],
       "amount": 500000,
       "status": "SUCCESS",
-      "createdAt": "2025-11-23T10:00:00",
-      "paidAt": "2025-11-23T10:05:00"
-    },
-    ...
+      "createdAt": "2025-11-23T10:00:00"
+    }
   ]
 }
 ```
@@ -1380,24 +1284,16 @@ Response:
 {
   "success": true,
   "message": "Lấy lịch sử thanh toán thành công",
-  "data": [
-    {
-      "id": "payment_id",
-      "courses": [ ... ],
-      "amount": 500000,
-      "status": "SUCCESS",
-      "paidAt": "2025-11-23T10:05:00"
-    }
-  ]
+  "data": [...]
 }
 ```
 
 ---
 
-## 13. FAVORITES
+## 1️⃣3️⃣ FAVORITES
 
-Base Path: `/api/favorites`  
-**Authentication:** Required (User role)
+Base: `/api/favorites`  
+**Auth:** User required
 
 ### 13.1. Add to Favorites
 ```http
@@ -1438,10 +1334,8 @@ Response:
       "courseTitle": "React Hooks Cơ Bản",
       "thumbnailUrl": "...",
       "price": 600000,
-      "discountedPrice": 500000,
       "selected": true
-    },
-    ...
+    }
   ]
 }
 ```
@@ -1494,11 +1388,7 @@ Response:
 {
   "success": true,
   "message": "Cập nhật trạng thái thành công",
-  "data": {
-    "userId": "user_id",
-    "courseId": "course_id",
-    "selected": true
-  }
+  "data": {...}
 }
 ```
 
@@ -1517,10 +1407,10 @@ Response:
 
 ---
 
-## 14. USER MANAGEMENT
+## 1️⃣4️⃣ USER MANAGEMENT
 
-Base Path: `/api/users`  
-**Authentication:** Required
+Base: `/api/users`  
+**Auth:** User required
 
 ### 14.1. Get My Profile
 ```http
@@ -1552,10 +1442,9 @@ Content-Type: multipart/form-data
 Body:
 request: {
   "fullName": "Nguyễn Văn A Updated",
-  "phoneNumber": "0987654321",
-  "bio": "Full-stack developer"
+  "phoneNumber": "0987654321"
 }
-avatarFile: [binary file]
+avatarFile: [binary]
 
 Response:
 {
@@ -1563,9 +1452,7 @@ Response:
   "message": "Cập nhật thông tin thành công",
   "data": {
     "id": "user_id",
-    "email": "student@example.com",
     "fullName": "Nguyễn Văn A Updated",
-    "phoneNumber": "0987654321",
     "avatarUrl": "http://localhost:8080/static/avatars/...",
     ...
   }
@@ -1594,7 +1481,7 @@ Response:
 
 ### 14.4. Delete User Account
 ```http
-DELETE /api/users/{id}
+DELETE /api/users/{userId}
 Authorization: Bearer {user_token}
 
 Response:
@@ -1607,10 +1494,10 @@ Response:
 
 ---
 
-## 15. ADMIN - USER MANAGEMENT
+## 1️⃣5️⃣ ADMIN - USER MANAGEMENT
 
-Base Path: `/api/admin/users`  
-**Authentication:** Required (Admin role)
+Base: `/api/admin/users`  
+**Auth:** Admin role required
 
 ### 15.1. Get All Users
 ```http
@@ -1629,15 +1516,14 @@ Response:
       "role": "USER",
       "isActive": true,
       "createdAt": "2025-11-20T10:00:00"
-    },
-    ...
+    }
   ]
 }
 ```
 
 ### 15.2. Update User Active Status
 ```http
-PUT /api/admin/users/active/{id}
+PUT /api/admin/users/active/{userId}
 Authorization: Bearer {admin_token}
 Content-Type: application/json
 
@@ -1656,7 +1542,7 @@ Response:
 
 ### 15.3. Update User Role
 ```http
-PUT /api/admin/users/{id}/role
+PUT /api/admin/users/{userId}/role
 Authorization: Bearer {admin_token}
 Content-Type: application/json
 
@@ -1677,21 +1563,21 @@ Response:
 
 ## 🚫 DEPRECATED ENDPOINTS
 
-The following endpoints have been **removed** or **disabled**:
+These endpoints are **DISABLED** (not available):
 
-### ❌ Cart APIs (All removed)
+### ❌ Cart APIs
 - `POST /api/cart/add/{userId}`
 - `GET /api/cart/all`
 - `GET /api/cart/{userId}`
 - `DELETE /api/cart/{userId}/item/{courseId}`
 
-### ❌ Order APIs (All removed)
+### ❌ Order APIs
 - `POST /api/orders/create-order`
 - `PUT /api/orders/{orderId}/update-status`
 - `GET /api/orders/{userId}`
 - `PUT /api/orders/{orderId}/cancel`
 
-### ❌ Admin Order APIs (All removed)
+### ❌ Admin Order APIs
 - `GET /api/admin/orders/all`
 - `PUT /api/admin/orders/{orderId}/status`
 
@@ -1699,53 +1585,86 @@ The following endpoints have been **removed** or **disabled**:
 
 ---
 
-## 📊 API Summary
+## 📊 Statistics
 
-| Module | Endpoints | Authentication |
-|--------|-----------|----------------|
-| Authentication | 8 | Public + Required |
-| Courses (Admin) | 6 | Admin |
-| Courses (User) | 2 | Public |
-| Course Categories | 4 | Admin + Public |
-| Chapters (Admin) | 5 | Admin |
-| Lessons (Admin) | 6 | Admin |
-| Lessons (User) | 6 | Required |
-| Curriculum | 4 | Public |
-| Progress Tracking | 4 | Required |
-| Quiz (Admin) | 4 | Admin |
-| Quiz (User) | 4 | Required |
-| Payment (VNPAY) | 6 | Required |
-| Favorites | 7 | Required |
-| User Management | 4 | Required |
-| Admin - User Mgmt | 3 | Admin |
+### Endpoints by Module:
+- Authentication: 9 endpoints
+- Courses (Admin): 6 endpoints
+- Courses (User): 2 endpoints
+- Course Categories: 4 endpoints
+- Chapters (Admin): 5 endpoints
+- Lessons (Admin): 6 endpoints
+- Lessons (User): 8 endpoints ⬆️ (added GET progress)
+- Curriculum: 4 endpoints
+- Progress Tracking: 4 endpoints
+- Quiz (Admin): 4 endpoints
+- Quiz (User): 4 endpoints
+- Payment (VNPAY): 6 endpoints
+- Favorites: 7 endpoints
+- User Management: 4 endpoints
+- Admin User Management: 3 endpoints
 
-**Total Active APIs:** 73+
+**Total Active:** 76 endpoints
+
+### Deprecated:
+- Cart: 4 endpoints ❌
+- Order: 4 endpoints ❌
+- Admin Order: 2 endpoints ❌
+
+**Total Deprecated:** 10 endpoints
 
 ---
 
-## 🔐 Authentication
+## 🔐 Authentication Types
 
-### JWT Token
-All protected endpoints require JWT token in header:
-```http
-Authorization: Bearer {jwt_token}
-```
+### Public (No Auth):
+- Courses (User): Get all, Get by ID
+- Curriculum: All endpoints
+- VNPAY callbacks: Return, IPN
 
-### Roles
-- `USER`: Regular user (can view courses, enroll, learn)
-- `ADMIN`: Administrator (full access to management APIs)
+### User Required:
+- Lessons (User): All endpoints
+- Progress: All endpoints
+- Quiz (User): All endpoints
+- Payment: Create, Get status, Get history
+- Favorites: All endpoints
+- User Management: All endpoints
 
-### Token Expiration
-- Access Token: 24 hours
-- Refresh Token: 7 days
+### Admin Required:
+- Courses (Admin): All endpoints
+- Categories: CUD operations
+- Chapters: All endpoints
+- Lessons (Admin): All endpoints
+- Quiz (Admin): All endpoints
+- Admin User Management: All endpoints
+
+---
+
+## 🆕 Latest Changes (Nov 23, 2025)
+
+### Added:
+1. ✅ `GET /api/lessons/{id}/progress` - Get saved video progress from database
+2. ✅ Video progress tracking: Auto-complete at 90%
+3. ✅ Quiz integration with progress (unlock chapter requirement)
+4. ✅ Access control: Check 90% video requirement for unlock
+
+### Fixed:
+1. ✅ Video progress now uses real userId (not temp-user-id)
+2. ✅ Quiz submit updates UserProgress.quizPassedAt
+3. ✅ Clear messages about 90% requirement
+4. ✅ Quiz passed check before unlocking next chapter
+
+### Removed:
+1. ❌ All Cart endpoints (replaced by direct payment)
+2. ❌ All Order endpoints (replaced by direct payment)
 
 ---
 
 ## 📝 Response Format
 
-All APIs follow consistent response format:
+All APIs follow this format:
 
-### Success Response
+### Success:
 ```json
 {
   "success": true,
@@ -1754,7 +1673,7 @@ All APIs follow consistent response format:
 }
 ```
 
-### Error Response
+### Error:
 ```json
 {
   "success": false,
@@ -1765,36 +1684,16 @@ All APIs follow consistent response format:
 
 ---
 
-## 🔗 Base URL
-
-**Development:** `http://localhost:8080`  
-**Production:** `https://your-domain.com`
-
----
-
-## 📚 Documentation
+## 🔗 Resources
 
 - **Postman Collection:** `Test_PostMan_23-11-2025.postman_collection.json`
-- **API Guide:** `PAYMENT_API_GUIDE.md`
-- **Migration Notes:** `MIGRATION_NOTES.md`
-- **Test Examples:** `PAYMENT_API_TEST_EXAMPLES.md`
-
----
-
-## 🆕 Version History
-
-### Version 2.0 (23/11/2025)
-- ✅ Added direct payment system
-- ✅ Removed cart and order modules
-- ✅ Added payment history endpoints
-- ✅ Updated course purchase flow
-
-### Version 1.0 (22/11/2025)
-- Initial release with cart and order system
+- **Frontend Guide:** `FRONTEND_VIDEO_TRACKING_GUIDE.md`
+- **Bug Fix Report:** `BUG_FIX_VIDEO_PROGRESS_USER_ID.md`
+- **Base URL:** `http://localhost:8080`
 
 ---
 
 **Last Updated:** November 23, 2025  
-**Total Endpoints:** 100+  
-**Active Modules:** 15
+**Total Endpoints:** 76 Active + 10 Deprecated = 86 Total  
+**Status:** ✅ Production Ready
 
