@@ -85,6 +85,7 @@ public class PaymentController {
     /**
      * VNPAY Return URL - User redirect callback
      * Called when VNPAY redirects user back (GET request with query params)
+     * Redirects to Frontend with payment result
      */
     @GetMapping("/vnpay/return")
     public ResponseEntity<ResponseMessage<Map<String, Object>>> vnpayReturn(
