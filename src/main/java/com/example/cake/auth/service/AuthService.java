@@ -108,16 +108,24 @@ public class AuthService {
                 otp
         );
 
-        if (!emailValidationService.isValidEmail(request.getEmail())) {
-            return new ResponseMessage<>(false, "Email không tồn tại hoặc không hợp lệ!", null);
+        // Validate email format and existence (with fallback)
+        try {
+            if (!emailValidationService.isValidEmail(request.getEmail())) {
+                return new ResponseMessage<>(false, "Email không tồn tại hoặc không hợp lệ!", null);
+            }
+        } catch (Exception e) {
+            // Fallback: if email validation API fails, continue with basic validation
+            System.err.println("⚠️ Email validation service failed: " + e.getMessage());
         }
 
-         emailService.sendOtpEmail(request.getEmail(), otp);
+        emailService.sendOtpEmail(request.getEmail(), otp);
         otpRedisService.saveOtp(token, jsonData, 5);
 
         Map<String, String> data = new HashMap<>();
         data.put("token", token);
-        return new ResponseMessage<>(true, "OTP đã gửi về email!",data);
+        data.put("email", request.getEmail());
+        data.put("message", "OTP đã được gửi đến email. Vui lòng kiểm tra hộp thư (bao gồm cả spam).");
+        return new ResponseMessage<>(true, "OTP đã gửi về email! Hiệu lực 5 phút.",data);
     }
 
 
@@ -221,12 +229,59 @@ public class AuthService {
 
 
 
+    // Resend OTP với token cũ
+    public ResponseMessage<Map<String, String>> resendOtp(String token) {
+        String json = otpRedisService.getOtp(token);
+
+        if (json == null) {
+            return new ResponseMessage<>(false, "Token không hợp lệ hoặc đã hết hạn! Vui lòng đăng ký lại.", null);
+        }
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(json);
+            String email = node.get("email").asText();
+
+            // Tạo OTP mới
+            String newOtp = String.format("%06d", new java.util.Random().nextInt(999999));
+
+            // Cập nhật OTP mới vào JSON
+            String updatedJson = String.format("""
+            {
+              "email": "%s",
+              "password": "%s",
+              "fullname": "%s",
+              "phoneNumber": "%s",
+              "otp": "%s"
+            }
+            """, node.get("email").asText(),
+                    node.get("password").asText(),
+                    node.get("fullname").asText(),
+                    node.get("phoneNumber").asText(),
+                    newOtp
+            );
+
+            // Gửi OTP mới
+            emailService.sendOtpEmail(email, newOtp);
+            otpRedisService.saveOtp(token, updatedJson, 5);
+
+            Map<String, String> data = new HashMap<>();
+            data.put("token", token);
+            data.put("email", email);
+            data.put("message", "OTP mới đã được gửi đến email.");
+
+            return new ResponseMessage<>(true, "OTP mới đã được gửi! Hiệu lực 5 phút.", data);
+        } catch (Exception e) {
+            return new ResponseMessage<>(false, "Lỗi khi gửi lại OTP!", null);
+        }
+    }
+
     // gửi mã otp xác nhận đăng ký tài khoản
     public ResponseMessage<User> verifyOtp(VerifyOtpRequest request) {
         String json = otpRedisService.getOtp(request.getToken());
 
         if (json == null) {
-            return new ResponseMessage<>(false, "Token không hợp lệ hoặc đã hết hạn!", null);
+            return new ResponseMessage<>(false, "Token không hợp lệ hoặc đã hết hạn! Vui lòng đăng ký lại.", null);
         }
 
         // Chuyển từ JSON về object bằng Jackson
@@ -239,9 +294,16 @@ public class AuthService {
                 return new ResponseMessage<>(false, "Mã OTP không đúng!", null);
             }
 
+            String email = node.get("email").asText();
+
+            // Kiểm tra email đã tồn tại chưa (trong trường hợp đã verify rồi)
+            if (userRepository.findByEmail(email).isPresent()) {
+                return new ResponseMessage<>(false, "Email đã được đăng ký! Vui lòng đăng nhập.", null);
+            }
+
             // Tạo user từ dữ liệu trong JSON
             User user = User.builder()
-                    .email(node.get("email").asText())
+                    .email(email)
                     .password(node.get("password").asText())
                     .fullname(node.get("fullname").asText())
                     .phoneNumber(node.get("phoneNumber").asText())

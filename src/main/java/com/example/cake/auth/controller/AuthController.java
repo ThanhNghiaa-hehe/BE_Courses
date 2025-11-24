@@ -76,4 +76,10 @@ public class AuthController {
             HttpServletResponse response) {
         return ResponseEntity.ok(authService.login(request, response));
     }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<ResponseMessage<Map<String, String>>> resendOtp(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        return ResponseEntity.ok(authService.resendOtp(token));
+    }
 }

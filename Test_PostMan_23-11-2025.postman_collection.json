@@ -149,7 +149,7 @@
 					"response": []
 				},
 				{
-					"name": "1.5. Login with Google",
+					"name": "1.6. Login with Google",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -171,7 +171,7 @@
 					"response": []
 				},
 				{
-					"name": "1.6. Refresh Token",
+					"name": "1.7. Refresh Token",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -184,7 +184,7 @@
 					"response": []
 				},
 				{
-					"name": "1.7. Forget Password",
+					"name": "1.8. Forget Password",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -206,7 +206,7 @@
 					"response": []
 				},
 				{
-					"name": "1.8. Verify OTP Password",
+					"name": "1.9. Verify OTP Password",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -228,7 +228,7 @@
 					"response": []
 				},
 				{
-					"name": "1.9. Reset Password",
+					"name": "1.10. Reset Password",
 					"request": {
 						"method": "POST",
 						"header": [
